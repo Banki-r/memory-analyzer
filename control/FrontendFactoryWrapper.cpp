@@ -1,9 +1,11 @@
+
 #include "FrontendFactoryWrapper.h"
 #include "FrontendActionWrapper.h"
-#include <iostream>
 
-std::unique_ptr<clang::FrontendAction> FrontendFactoryWrapper::create()
-{
-    llvm::outs() <<  "FrontendAction created...\n";
+FrontendFactoryWrapper::FrontendFactoryWrapper() {
+
+}
+
+std::unique_ptr<clang::FrontendAction> FrontendFactoryWrapper::create() {
     return std::make_unique<FrontendActionWrapper>();
 }
