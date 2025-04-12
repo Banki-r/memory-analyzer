@@ -20,7 +20,7 @@ int main(int argc, const char** argv)
     // of the compiler options used in the invocation of the tool
     auto argsParser = CommonOptionsParser::create(
         argc, argv, toolCategory);
-    if (!expectedArgsParser) {
+    if (!argsParser) {
         llvm::errs() << argsParser.takeError();
         return -1;
     }

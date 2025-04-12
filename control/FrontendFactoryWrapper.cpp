@@ -6,6 +6,6 @@ FrontendFactoryWrapper::FrontendFactoryWrapper() {
 
 }
 
-std::unique_ptr<clang::FrontendActionWrapper> FrontendFactoryWrapper::create() {
+std::unique_ptr<clang::FrontendAction> FrontendFactoryWrapper::create() {
     return std::make_unique<FrontendActionWrapper>();
 }

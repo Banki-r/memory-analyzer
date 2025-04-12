@@ -6,5 +6,5 @@
 class FrontendFactoryWrapper : public clang::tooling::FrontendActionFactory{
     public:
     FrontendFactoryWrapper();
-    std::unique_ptr<clang::FrontendActionWrapper> create() override;
+    std::unique_ptr<clang::FrontendAction> create() override;
 };         
