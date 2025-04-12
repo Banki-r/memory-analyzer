@@ -1,38 +1,21 @@
 #include "ASTVisitorWrapper.h"
 
-bool ASTVisitorWrapper::VisitCXXRecordDecl(clang::CXXRecordDecl* decl)
-{
+static bool ASTVisitorWrapper::isFirstLetterUpperCase(const std::string &str) {
+    return str.size() != 0 && std::isupper(str[0]);
+}
 
-    llvm::outs() << "got here cxx\n";
-    const clang::Type* type = decl->getTypeForDecl();
-    bool exit = type->isPointerType();
+bool ASTVisitorWrapper::VisitCXXRecordDecl(const clang::RecordDecl *record) {
+    std::string name = record->getNameAsString();
 
-    if(exit)
-    {
-        llvm::outs() << "Pointer found: \n" << decl->getNameAsString();
+    if (!isFirstLetterUpperCase(name)) {
+        std::cout << "Record Decl : " << name
+                  <<" doesn't start with uppercase! \n";
     }
 
-    
-    return !exit;
-}
-
-bool ASTVisitorWrapper::VisitStmt(clang::Stmt* stmt)
-{
-    //logic
-    llvm::outs() << "got here visit stmt";
     return true;
 }
 
-bool ASTVisitorWrapper::VisitDecl(clang::Decl* decl)
-{
-    //logic
-    llvm::outs() << "got here visit decl " << decl->getDeclKindName();
-    return true;
-}
-
-bool ASTVisitorWrapper::VisitType(clang::Type* type)
-{
-    //logic
-    llvm::outs() << "got here visit type";
-    return true;
+bool ASTVisitorWrapper::TraverseDecl(clang::Decl *decl)  {
+    return
+       clang::RecursiveASTVisitor<ASTVisitorWrapper>::TraverseDecl(decl);
 }

@@ -1,8 +1,11 @@
+
+#include <clang/AST/RecursiveASTVisitor.h>
 #include "ASTConsumerWrapper.h"
 
-void ASTConsumerWrapper::HandleTranslationUnit(clang::ASTContext& Context)
-{
-    llvm::outs() << "Handling translation unit...\n";
-    clang::TranslationUnitDecl* transUnit = Context.getTranslationUnitDecl();
-    visitor.TraverseDecl(transUnit);
+#include <iostream>
+
+void ASTConsumerWrapper::HandleTranslationUnit(clang::ASTContext &ctx) {
+    clang::TranslationUnitDecl *tuDecl = ctx.getTranslationUnitDecl();
+    ASTVisitorWrapper visitor;
+    visitor.TraverseDecl(tuDecl);
 }
