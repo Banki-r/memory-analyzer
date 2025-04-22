@@ -4,13 +4,15 @@
 #include "ASTConsumerWrapper.h"
 
 #include <iostream>
-ASTConsumerWrapper::ASTConsumerWrapper(clang::ASTContext *context)
+ASTConsumerWrapper::ASTConsumerWrapper(clang::ASTContext *context, clang::SourceManager &sourceManager)
+: _context(context), _sourceManager(sourceManager)
 {
-    _context = context;
+    _matcher.addMatcher(_mMatcher.getMatcher(), &_mMatcher);
 }
 
 void ASTConsumerWrapper::HandleTranslationUnit(clang::ASTContext &ctx) {
+    _matcher.matchAST(ctx);
     clang::TranslationUnitDecl *tuDecl = ctx.getTranslationUnitDecl();
-    ASTVisitorWrapper visitor;
+    ASTVisitorWrapper visitor(_context);
     visitor.TraverseDecl(tuDecl);
 }

@@ -13,11 +13,6 @@ static llvm::cl::OptionCategory toolCategory("class-analyzer <options>");
 
 int main(int argc, const char** argv)
 {
-    // Use clang's argument parser infrastructure
-    // This is used for giving clang tooling the path
-    // to the source files passed in to the tool.
-    // It also gets the compilation database - a collection
-    // of the compiler options used in the invocation of the tool
     auto argsParser = CommonOptionsParser::create(
         argc, argv, toolCategory);
     if (!argsParser) {
