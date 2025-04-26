@@ -8,6 +8,7 @@ ASTConsumerWrapper::ASTConsumerWrapper(clang::ASTContext *context, clang::Source
 : _context(context), _sourceManager(sourceManager)
 {
     _matcher.addMatcher(_mMatcher.getMatcher(), &_mMatcher);
+    _matcher.addMatcher(_fMatcher.getMatcher(), &_fMatcher);
 }
 
 void ASTConsumerWrapper::HandleTranslationUnit(clang::ASTContext &ctx) {
