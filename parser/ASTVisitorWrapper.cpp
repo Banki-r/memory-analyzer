@@ -45,6 +45,7 @@ bool ASTVisitorWrapper::VisitDeclaratorDecl(clang::DeclaratorDecl *record)
 
 bool ASTVisitorWrapper::VisitDeclRefExpr(clang::DeclRefExpr *refexpr)
 {
+    /*
     clang::SourceLocation startLoc = refexpr->getLocation();
     clang::ValueDecl *dec = refexpr->getDecl();
     std::string decName = dec->getQualifiedNameAsString();
@@ -59,7 +60,7 @@ bool ASTVisitorWrapper::VisitDeclRefExpr(clang::DeclRefExpr *refexpr)
     {
         llvm::outs() << "DeclRefExpr start loc:" << locStr(startLoc) << " with decl: " << decName <<"\n";
     }
-    
+    */
     return true;
 }
 
@@ -67,13 +68,4 @@ bool ASTVisitorWrapper::TraverseDecl(clang::Decl *decl)
 {
     return
        clang::RecursiveASTVisitor<ASTVisitorWrapper>::TraverseDecl(decl);
-}
-
-void ASTVisitorWrapper::FoundPointer(std::string allocLoc, std::string varName)
-{
-    llvm::outs() << "Pushing back " << varName << "at :" << allocLoc << "\n";
-    AllocedPointer ap;
-    ap.allocLine = allocLoc;
-    ap.name = varName;
-    _allocedPointers.push_back(ap);
 }

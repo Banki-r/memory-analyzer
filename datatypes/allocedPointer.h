@@ -1,8 +1,9 @@
+#pragma once
 #include <iostream>
 
 struct AllocedPointer
 {
     std::string allocLine;
     std::string name;
-    std::string freeLine = nullptr;
+    std::string freeLine;
 };
