@@ -13,7 +13,6 @@ add_clang_executable(memory-analyzer
     parser/ASTVisitorWrapper.cpp
     datatypes/allocedPointer.h
     cases/MallocMatcher.cpp
-    cases/FreeMatcher.cpp
 )
 
 target_link_libraries(memory-analyzer
