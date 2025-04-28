@@ -6,7 +6,6 @@
 #include<clang/ASTMatchers/ASTMatchFinder.h>
 
 #include <cases/MallocMatcher.cpp>
-#include <cases/FreeMatcher.cpp>
 
 class ASTConsumerWrapper : public clang::ASTConsumer
 {
@@ -15,7 +14,6 @@ private:
     clang::ast_matchers::MatchFinder _matcher;
     clang::SourceManager &_sourceManager;
     MallocMatcher _mMatcher;
-    FreeMatcher _fMatcher;
 public:
     ASTConsumerWrapper(clang::ASTContext *context, clang::SourceManager &sourceManager);
     void HandleTranslationUnit(clang::ASTContext &context) override;

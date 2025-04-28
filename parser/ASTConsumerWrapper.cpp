@@ -7,12 +7,12 @@
 ASTConsumerWrapper::ASTConsumerWrapper(clang::ASTContext *context, clang::SourceManager &sourceManager)
 : _context(context), _sourceManager(sourceManager)
 {
-    _matcher.addMatcher(_mMatcher.getMatcher(), &_mMatcher);
-    _matcher.addMatcher(_fMatcher.getMatcher(), &_fMatcher);
+    _matcher.addMatcher(_mMatcher.getMallocMatcher(), &_mMatcher);
+    _matcher.addMatcher(_mMatcher.getFreeMatcher(), &_mMatcher);
 }
 
 void ASTConsumerWrapper::HandleTranslationUnit(clang::ASTContext &ctx) {
-    _matcher.matchAST(ctx);
+    _matcher.matchAST(*_context);
     clang::TranslationUnitDecl *tuDecl = ctx.getTranslationUnitDecl();
     ASTVisitorWrapper visitor(_context);
     visitor.TraverseDecl(tuDecl);
