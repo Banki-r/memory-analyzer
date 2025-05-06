@@ -1,22 +1,29 @@
-#include "clang/ASTMatchers/ASTMatchers.h"
-#include "clang/ASTMatchers/ASTMatchFinder.h"
-#include "clang/Basic/SourceManager.h"
+#include "IMatcher.h"
 #include <vector>
 #include <datatypes/allocedPointer.h>
 
 using namespace clang;
 using namespace clang::ast_matchers;
 
-class MallocMatcher : public clang::ast_matchers::MatchFinder::MatchCallback
+class MallocMatcher : public IMatcher
 {
 private:
-    clang::ast_matchers::StatementMatcher _mMatcher = declStmt(hasDescendant(varDecl().bind("var")),
+    StatementMatcher _mMatcher = declStmt(hasDescendant(varDecl().bind("var")),
     hasDescendant(callExpr(callee(functionDecl(hasName("malloc")))))).bind("malloc");
-
-    clang::ast_matchers::StatementMatcher _fMatcher = callExpr(callee(functionDecl(matchesName("free"))), 
+    StatementMatcher _fMatcher = callExpr(callee(functionDecl(matchesName("free"))), 
     hasDescendant(implicitCastExpr(hasDescendant(implicitCastExpr(hasDescendant(declRefExpr().bind("var"))))))).bind("free");
 
     std::vector<AllocedPointer> _allocedPointers;
+    std::vector<StatementMatcher> _matchers = {_mMatcher, _fMatcher};
+    std::list<int> toRemove;
+    
+    void removeFromVector()
+    {
+        for(int ind : toRemove)
+        {
+            _allocedPointers.erase(_allocedPointers.begin() + ind);
+        }
+    }
 public:
     
     virtual void run(const MatchFinder::MatchResult &result) override
@@ -54,14 +61,22 @@ public:
                 if(_allocedPointers.at(i).name == varName)
                 {
                     _allocedPointers.at(i).freeLine = freeLine;
+
+                    // For debugging:
+                    llvm::outs() << "Variable " << varName
+                    << " has a malloc AND a free call. " << freeLine << "\n";
+                    toRemove.push_back(i);
                 }
             }
         }
+
+        removeFromVector();
     }
 
-    clang::ast_matchers::StatementMatcher getMallocMatcher() { return _mMatcher;}
+    virtual std::vector<StatementMatcher> getMatchers() override
+    {
+        return _matchers;
+    }
 
-    clang::ast_matchers::StatementMatcher getFreeMatcher() { return _fMatcher;}
-
-    std::vector<AllocedPointer>* getPointers() { return &_allocedPointers;}
+    std::vector<AllocedPointer>* getVector() { return &_allocedPointers;}
 };

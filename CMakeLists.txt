@@ -9,10 +9,10 @@ add_clang_executable(memory-analyzer
     control/Main.cpp
     parser/ASTConsumerWrapper.h
     parser/ASTConsumerWrapper.cpp
-    parser/ASTVisitorWrapper.h
-    parser/ASTVisitorWrapper.cpp
     datatypes/allocedPointer.h
-    cases/MallocMatcher.cpp
+    cases/matchers/MallocMatcher.cpp
+    cases/matchers/IMatcher.h
+    cases/visitors/IASTVisitor.h
 )
 
 target_link_libraries(memory-analyzer
