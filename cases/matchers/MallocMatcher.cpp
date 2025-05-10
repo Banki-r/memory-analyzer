@@ -1,6 +1,6 @@
 #include "IMatcher.h"
 #include <vector>
-#include <datatypes/allocedPointer.h>
+#include <datatypes/AllocedPointer.h>
 
 using namespace clang;
 using namespace clang::ast_matchers;

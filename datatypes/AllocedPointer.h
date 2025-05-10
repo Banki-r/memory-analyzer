@@ -3,7 +3,7 @@
 
 struct AllocedPointer
 {
-    std::string allocLine;
     std::string name;
+    std::string allocLine;
     std::string freeLine;
 };
