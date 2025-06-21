@@ -7,6 +7,7 @@
 
 #include <cases/matchers/IMatcher.h>
 #include <cases/matchers/MallocMatcher.cpp>
+#include <cases/matchers/NewMatcher.cpp>
 #include <cases/visitors/IASTVisitor.h>
 
 class ASTConsumerWrapper : public clang::ASTConsumer

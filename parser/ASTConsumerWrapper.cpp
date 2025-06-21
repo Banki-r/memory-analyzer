@@ -19,6 +19,10 @@ ASTConsumerWrapper::ASTConsumerWrapper(clang::ASTContext *context, clang::Source
 void ASTConsumerWrapper::HandleTranslationUnit(clang::ASTContext &ctx) {
     _matchFinder.matchAST(*_context);
     clang::TranslationUnitDecl *tuDecl = ctx.getTranslationUnitDecl();
+    for(auto& matcher : _matchers)
+    {
+        matcher->writeOutput();
+    }
 }
 
 // edit this function if a new Matcher is created,
@@ -26,4 +30,5 @@ void ASTConsumerWrapper::HandleTranslationUnit(clang::ASTContext &ctx) {
 void ASTConsumerWrapper::constructMatchers()
 {
     _matchers.push_back(std::make_unique<MallocMatcher>());
+    _matchers.push_back(std::make_unique<NewMatcher>());
 }

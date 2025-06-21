@@ -12,4 +12,5 @@ class IMatcher : public MatchFinder::MatchCallback
 public:
     virtual void run(const MatchFinder::MatchResult &result) = 0;
     virtual std::vector<StatementMatcher> getMatchers() = 0;
+    virtual void writeOutput() = 0;
 };

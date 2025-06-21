@@ -24,21 +24,22 @@ private:
             _allocedPointers.erase(_allocedPointers.begin() + ind);
         }
     }
+
 public:
     
     virtual void run(const MatchFinder::MatchResult &result) override
     {
         auto malloc = result.Nodes.getNodeAs<DeclStmt>("malloc");
-        auto malloc_var = result.Nodes.getNodeAs<VarDecl>("var");
+        auto mallocVar = result.Nodes.getNodeAs<VarDecl>("var");
 
         auto free = result.Nodes.getNodeAs<CallExpr>("free");
-        auto free_var = result.Nodes.getNodeAs<DeclRefExpr>("var");
+        auto freeVar = result.Nodes.getNodeAs<DeclRefExpr>("var");
 
-        if(malloc && malloc_var)
+        if(malloc && mallocVar)
         {
             AllocedPointer ap;
             ap.allocLine = malloc->getBeginLoc().printToString(result.Context->getSourceManager());
-            ap.name = malloc_var->getNameAsString();
+            ap.name = mallocVar->getNameAsString();
             ap.freeLine = "";
             _allocedPointers.push_back(ap);
             // For debugging:
@@ -50,21 +51,21 @@ public:
 
         if(free)
         {
-            std::string varName = free_var->getNameInfo().getAsString();
+            std::string varName = freeVar->getNameInfo().getAsString();
             std::string freeLine = free->getBeginLoc().printToString(result.Context->getSourceManager());
             // For debugging:
             /*llvm::outs() << "Free found for variable: " << varName
             << " at line: " << freeLine << "\n";*/
             
-            for( int i = 0; i <_allocedPointers.size(); ++i)
+            for( size_t i = 0; i <_allocedPointers.size(); ++i)
             {
                 if(_allocedPointers.at(i).name == varName)
                 {
                     _allocedPointers.at(i).freeLine = freeLine;
 
                     // For debugging:
-                    llvm::outs() << "Variable " << varName
-                    << " has a malloc AND a free call. " << freeLine << "\n";
+                    /*llvm::outs() << "Variable " << varName
+                    << " has a malloc AND a free call. " << freeLine << "\n";*/
                     toRemove.push_back(i);
                 }
             }
@@ -78,5 +79,13 @@ public:
         return _matchers;
     }
 
-    std::vector<AllocedPointer>* getVector() { return &_allocedPointers;}
+    virtual void writeOutput() override 
+    {
+        for(AllocedPointer element : _allocedPointers)
+        {
+            llvm::outs() << "Variable " << element.name
+            << " declared with a malloc call at: " << element.allocLine 
+            << " , is not freed up!\n";
+        }
+    }
 };
