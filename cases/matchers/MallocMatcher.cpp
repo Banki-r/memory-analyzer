@@ -70,8 +70,6 @@ public:
                 }
             }
         }
-
-        removeFromVector();
     }
 
     virtual std::vector<StatementMatcher> getMatchers() override
@@ -81,6 +79,7 @@ public:
 
     virtual void writeOutput() override 
     {
+        removeFromVector();
         for(AllocedPointer element : _allocedPointers)
         {
             llvm::outs() << "Variable " << element.name

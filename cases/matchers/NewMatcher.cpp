@@ -8,13 +8,13 @@ using namespace clang::ast_matchers;
 class NewMatcher : public IMatcher
 {
 private:
-    StatementMatcher _mMatcher = declStmt(hasDescendant(varDecl(hasDescendant(cxxNewExpr()))
+    StatementMatcher _nMatcher = declStmt(hasDescendant(varDecl(hasDescendant(cxxNewExpr()))
     .bind("var"))).bind("new");
-    StatementMatcher _fMatcher = cxxDeleteExpr(hasDescendant(implicitCastExpr(hasDescendant(declRefExpr()
+    StatementMatcher _dMatcher = cxxDeleteExpr(hasDescendant(implicitCastExpr(hasDescendant(declRefExpr()
     .bind("var"))))).bind("delete");
 
     std::vector<AllocedPointer> _allocedPointers;
-    std::vector<StatementMatcher> _matchers = {_mMatcher, _fMatcher};
+    std::vector<StatementMatcher> _matchers = {_nMatcher, _dMatcher};
     std::list<int> toRemove;
     
     void removeFromVector()
@@ -60,8 +60,6 @@ public:
                 }
             }
         }
-
-        removeFromVector();
     }
 
     virtual std::vector<StatementMatcher> getMatchers() override
@@ -71,6 +69,7 @@ public:
 
     virtual void writeOutput() override 
     {
+        removeFromVector();
         for(AllocedPointer element : _allocedPointers)
         {
             llvm::outs() << "Variable " << element.name

@@ -36,4 +36,5 @@ void ASTConsumerWrapper::constructMatchers()
 {
     _matchers.push_back(std::make_unique<MallocMatcher>());
     _matchers.push_back(std::make_unique<NewMatcher>());
+    _matchers.push_back(std::make_unique<ReAllocMatcher>());
 }

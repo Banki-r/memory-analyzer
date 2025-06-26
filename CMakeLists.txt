@@ -10,7 +10,10 @@ add_clang_executable(memory-analyzer
     parser/ASTConsumerWrapper.h
     parser/ASTConsumerWrapper.cpp
     datatypes/AllocedPointer.h
+    datatypes/ReAllocedPointer.h
     cases/matchers/MallocMatcher.cpp
+    cases/matchers/NewMatcher.cpp
+    cases/matchers/ReAllocMatcher.cpp
     cases/matchers/IMatcher.h
     cases/visitors/IASTVisitor.h
 )
