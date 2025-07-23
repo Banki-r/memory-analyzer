@@ -9,6 +9,7 @@ class IASTVisitor : public clang::RecursiveASTVisitor<IASTVisitor>
 private:
     clang::ASTContext *_context;
 public:
+
     std::string locStr(clang::SourceLocation loc)
     {
         return loc.printToString(_context->getSourceManager());
@@ -19,11 +20,9 @@ public:
         return locStr(decl->getLocation());
     }
 
-    std::string ypeStr(clang::QualType qType)
+    std::string typeStr(clang::QualType qType)
     {
         return qType.getAsString();
     }
-    virtual bool VisitDeclaratorDecl(clang::DeclaratorDecl *record) = 0;
-    virtual bool VisitDeclRefExpr(clang::DeclRefExpr *refexpr) = 0;
-    virtual bool TraverseDecl(clang::Decl *decl) = 0;
+
 };

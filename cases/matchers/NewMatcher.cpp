@@ -36,6 +36,7 @@ public:
 
         if(newNode && newVar)
         {
+            _allocFunc = getParentFunctionName(result, *newNode);
             AllocedPointer ap;
             ap.allocLine = newNode->getBeginLoc().printToString(result.Context->getSourceManager());
             if(ap.allocLine.find(".cpp") != std::string::npos)
@@ -48,15 +49,19 @@ public:
 
         if(deleteNode)
         {
-            std::string varName = deleteVar->getNameInfo().getAsString();
-            std::string freeLine = deleteNode->getBeginLoc().printToString(result.Context->getSourceManager());
-            
-            for( size_t i = 0; i <_allocedPointers.size(); ++i)
+            _reallocFunc = getParentFunctionName(result, *deleteNode);
+            if(_allocFunc == _reallocFunc)
             {
-                if(_allocedPointers.at(i).name == varName)
+                std::string varName = deleteVar->getNameInfo().getAsString();
+                std::string freeLine = deleteNode->getBeginLoc().printToString(result.Context->getSourceManager());
+                
+                for( size_t i = 0; i <_allocedPointers.size(); ++i)
                 {
-                    _allocedPointers.at(i).freeLine = freeLine;
-                    toRemove.push_back(i);
+                    if(_allocedPointers.at(i).name == varName)
+                    {
+                        _allocedPointers.at(i).freeLine = freeLine;
+                        toRemove.push_back(i);
+                    }
                 }
             }
         }

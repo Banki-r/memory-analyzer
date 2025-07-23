@@ -29,6 +29,7 @@ private:
             _reAllocedPointers.erase(_reAllocedPointers.begin() + ind);
         }
     }
+
 public:
     
     virtual void run(const MatchFinder::MatchResult &result) override
@@ -38,9 +39,9 @@ public:
 
         auto reallocNode = result.Nodes.getNodeAs<BinaryOperator>("line");
         auto reallocVar = result.Nodes.getNodeAs<DeclRefExpr>("var");
-
         if(allocNode && allocVar)
         {
+            _allocFunc = getParentFunctionName(result, *allocNode);
             ReAllocedPointer ap;
             ap.allocLine = allocNode->getBeginLoc().printToString(result.Context->getSourceManager());
             QualType type = allocVar->getType();
@@ -53,16 +54,21 @@ public:
                 _reAllocedPointers.push_back(ap);
             }
         }
+
         if(reallocNode && reallocNode->isAssignmentOp())
         {
-            std::string varName = reallocVar->getNameInfo().getAsString();
-            std::string reallocLine = reallocNode->getBeginLoc().printToString(result.Context->getSourceManager());
-            
-            for( size_t i = 0; i <_reAllocedPointers.size(); ++i)
+            _reallocFunc = getParentFunctionName(result, *reallocNode);
+            if(_allocFunc == _reallocFunc)
             {
-                if(_reAllocedPointers.at(i).name == varName)
+                std::string varName = reallocVar->getNameInfo().getAsString();
+                std::string reallocLine = reallocNode->getBeginLoc().printToString(result.Context->getSourceManager());
+                
+                for( size_t i = 0; i <_reAllocedPointers.size(); ++i)
                 {
-                    _reAllocedPointers.at(i).reAllocedLine = reallocLine;
+                    if(_reAllocedPointers.at(i).name == varName)
+                    {
+                        _reAllocedPointers.at(i).reAllocedLine = reallocLine;
+                    }
                 }
             }
         }

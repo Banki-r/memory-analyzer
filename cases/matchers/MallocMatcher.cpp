@@ -37,6 +37,7 @@ public:
 
         if(malloc && mallocVar)
         {
+            _allocFunc = getParentFunctionName(result, *malloc);
             AllocedPointer ap;
             ap.allocLine = malloc->getBeginLoc().printToString(result.Context->getSourceManager());
             ap.name = mallocVar->getNameAsString();
@@ -51,22 +52,26 @@ public:
 
         if(free)
         {
-            std::string varName = freeVar->getNameInfo().getAsString();
-            std::string freeLine = free->getBeginLoc().printToString(result.Context->getSourceManager());
-            // For debugging:
-            /*llvm::outs() << "Free found for variable: " << varName
-            << " at line: " << freeLine << "\n";*/
-            
-            for( size_t i = 0; i <_allocedPointers.size(); ++i)
+            _reallocFunc = getParentFunctionName(result, *free);
+            if(_allocFunc == _reallocFunc)
             {
-                if(_allocedPointers.at(i).name == varName)
+                std::string varName = freeVar->getNameInfo().getAsString();
+                std::string freeLine = free->getBeginLoc().printToString(result.Context->getSourceManager());
+                // For debugging:
+                /*llvm::outs() << "Free found for variable: " << varName
+                << " at line: " << freeLine << "\n";*/
+                
+                for( size_t i = 0; i <_allocedPointers.size(); ++i)
                 {
-                    _allocedPointers.at(i).freeLine = freeLine;
+                    if(_allocedPointers.at(i).name == varName)
+                    {
+                        _allocedPointers.at(i).freeLine = freeLine;
 
-                    // For debugging:
-                    /*llvm::outs() << "Variable " << varName
-                    << " has a malloc AND a free call. " << freeLine << "\n";*/
-                    toRemove.push_back(i);
+                        // For debugging:
+                        /*llvm::outs() << "Variable " << varName
+                        << " has a malloc AND a free call. " << freeLine << "\n";*/
+                        toRemove.push_back(i);
+                    }
                 }
             }
         }
