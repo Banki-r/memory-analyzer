@@ -12,17 +12,17 @@ private:
     hasDescendant(callExpr(callee(functionDecl(hasName("malloc")))))).bind("malloc");
     StatementMatcher _fMatcher = callExpr(callee(functionDecl(matchesName("free"))), 
     hasDescendant(implicitCastExpr(hasDescendant(implicitCastExpr(hasDescendant(declRefExpr().bind("var"))))))).bind("free");
-
+    StatementMatcher _retMatcher = returnStmt(hasDescendant(declRefExpr().bind("retVar"))).bind("return");
+    
     std::vector<AllocedPointer> _allocedPointers;
-    std::vector<StatementMatcher> _matchers = {_mMatcher, _fMatcher};
-    std::list<int> toRemove;
+    std::vector<StatementMatcher> _matchers = {_retMatcher, _mMatcher, _fMatcher};
     
     void removeFromVector()
     {
-        for(int ind : toRemove)
-        {
-            _allocedPointers.erase(_allocedPointers.begin() + ind);
-        }
+
+        _allocedPointers.erase(std::remove_if(_allocedPointers.begin(), 
+        _allocedPointers.end(), [](AllocedPointer i) { return !i.freeLine.empty();}),
+        _allocedPointers.end());
     }
 
 public:
@@ -35,9 +35,11 @@ public:
         auto free = result.Nodes.getNodeAs<CallExpr>("free");
         auto freeVar = result.Nodes.getNodeAs<DeclRefExpr>("var");
 
+        auto retVar = result.Nodes.getNodeAs<DeclRefExpr>("retVar");
+
         if(malloc && mallocVar)
         {
-            _allocFunc = getParentFunctionName(result, *malloc);
+            _allocFunc = getParentFunction(result, *malloc);
             AllocedPointer ap;
             ap.allocLine = malloc->getBeginLoc().printToString(result.Context->getSourceManager());
             ap.name = mallocVar->getNameAsString();
@@ -50,9 +52,21 @@ public:
             
         }
 
+        if(retVar)
+        {
+            auto retVarName = retVar->getNameInfo().getAsString();
+            for( size_t i = 0; i <_allocedPointers.size(); ++i)
+            {
+                if(_allocedPointers.at(i).name == retVarName)
+                {
+                    _allocedPointers.at(i).freeLine = "returned by function";
+                }
+            }
+        }
+
         if(free)
         {
-            _reallocFunc = getParentFunctionName(result, *free);
+            _reallocFunc = getParentFunction(result, *free);
             if(_allocFunc == _reallocFunc)
             {
                 std::string varName = freeVar->getNameInfo().getAsString();
@@ -66,11 +80,6 @@ public:
                     if(_allocedPointers.at(i).name == varName)
                     {
                         _allocedPointers.at(i).freeLine = freeLine;
-
-                        // For debugging:
-                        /*llvm::outs() << "Variable " << varName
-                        << " has a malloc AND a free call. " << freeLine << "\n";*/
-                        toRemove.push_back(i);
                     }
                 }
             }

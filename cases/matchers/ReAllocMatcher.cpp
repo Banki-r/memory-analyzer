@@ -13,21 +13,13 @@ private:
 
     std::vector<ReAllocedPointer> _reAllocedPointers;
     std::vector<StatementMatcher> _matchers = {_aMatcher, _rMatcher};
-    std::list<int> toRemove;
 
     void removeFromVector()
     {
-        for(int i = 0; i < _reAllocedPointers.size(); ++i)
-        {
-            if(_reAllocedPointers[i].reAllocedLine.empty())
-            {
-                toRemove.push_back(i);
-            }
-        }
-        for(int ind : toRemove)
-        {
-            _reAllocedPointers.erase(_reAllocedPointers.begin() + ind);
-        }
+
+        _reAllocedPointers.erase(std::remove_if(_reAllocedPointers.begin(), 
+        _reAllocedPointers.end(), [](ReAllocedPointer i) { return i.reAllocedLine.empty();}),
+        _reAllocedPointers.end());
     }
 
 public:
@@ -39,9 +31,10 @@ public:
 
         auto reallocNode = result.Nodes.getNodeAs<BinaryOperator>("line");
         auto reallocVar = result.Nodes.getNodeAs<DeclRefExpr>("var");
+
         if(allocNode && allocVar)
         {
-            _allocFunc = getParentFunctionName(result, *allocNode);
+            _allocFunc = getParentFunction(result, *allocNode);
             ReAllocedPointer ap;
             ap.allocLine = allocNode->getBeginLoc().printToString(result.Context->getSourceManager());
             QualType type = allocVar->getType();
@@ -57,7 +50,7 @@ public:
 
         if(reallocNode && reallocNode->isAssignmentOp())
         {
-            _reallocFunc = getParentFunctionName(result, *reallocNode);
+            _reallocFunc = getParentFunction(result, *reallocNode);
             if(_allocFunc == _reallocFunc)
             {
                 std::string varName = reallocVar->getNameInfo().getAsString();

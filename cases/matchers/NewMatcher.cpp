@@ -12,17 +12,17 @@ private:
     .bind("var"))).bind("new");
     StatementMatcher _dMatcher = cxxDeleteExpr(hasDescendant(implicitCastExpr(hasDescendant(declRefExpr()
     .bind("var"))))).bind("delete");
+    StatementMatcher _retMatcher = returnStmt(hasDescendant(declRefExpr().bind("retVar"))).bind("return");
 
     std::vector<AllocedPointer> _allocedPointers;
-    std::vector<StatementMatcher> _matchers = {_nMatcher, _dMatcher};
-    std::list<int> toRemove;
+    std::vector<StatementMatcher> _matchers = {_retMatcher, _nMatcher, _dMatcher};
     
     void removeFromVector()
     {
-        for(int ind : toRemove)
-        {
-            _allocedPointers.erase(_allocedPointers.begin() + ind);
-        }
+
+        _allocedPointers.erase(std::remove_if(_allocedPointers.begin(), 
+        _allocedPointers.end(), [](AllocedPointer i) { return !i.freeLine.empty();}),
+        _allocedPointers.end());
     }
 public:
     
@@ -34,9 +34,11 @@ public:
         auto deleteNode = result.Nodes.getNodeAs<CXXDeleteExpr>("delete");
         auto deleteVar = result.Nodes.getNodeAs<DeclRefExpr>("var");
 
+        auto retVar = result.Nodes.getNodeAs<DeclRefExpr>("retVar");
+
         if(newNode && newVar)
         {
-            _allocFunc = getParentFunctionName(result, *newNode);
+            _allocFunc = getParentFunction(result, *newNode);
             AllocedPointer ap;
             ap.allocLine = newNode->getBeginLoc().printToString(result.Context->getSourceManager());
             if(ap.allocLine.find(".cpp") != std::string::npos)
@@ -47,9 +49,21 @@ public:
             }
         }
 
+        if(retVar)
+        {
+            auto retVarName = retVar->getNameInfo().getAsString();
+            for( size_t i = 0; i <_allocedPointers.size(); ++i)
+            {
+                if(_allocedPointers.at(i).name == retVarName)
+                {
+                    _allocedPointers.at(i).freeLine = "returned by function";
+                }
+            }
+        }
+        
         if(deleteNode)
         {
-            _reallocFunc = getParentFunctionName(result, *deleteNode);
+            _reallocFunc = getParentFunction(result, *deleteNode);
             if(_allocFunc == _reallocFunc)
             {
                 std::string varName = deleteVar->getNameInfo().getAsString();
@@ -60,7 +74,6 @@ public:
                     if(_allocedPointers.at(i).name == varName)
                     {
                         _allocedPointers.at(i).freeLine = freeLine;
-                        toRemove.push_back(i);
                     }
                 }
             }

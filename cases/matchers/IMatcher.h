@@ -10,11 +10,11 @@ using namespace clang::ast_matchers;
 class IMatcher : public MatchFinder::MatchCallback
 {
 protected:
-    std::string _allocFunc;
-    std::string _reallocFunc;
+    const FunctionDecl* _allocFunc;
+    const FunctionDecl* _reallocFunc;
 
     template<typename T>
-    std::string getParentFunctionName(const MatchFinder::MatchResult &result, T &Node)
+    const FunctionDecl* getParentFunction(const MatchFinder::MatchResult &result, T &Node)
     {
         clang::DynTypedNodeList parentNodeList = result.Context->getParents(Node);
         clang::DynTypedNode parentNode;
@@ -23,7 +23,7 @@ protected:
             parentNode = parentNodeList[0];
             if(const FunctionDecl* Parent = parentNode.get<FunctionDecl>())
             {
-                return Parent->getNameAsString();
+                return Parent;
             }
             parentNodeList = result.Context->getParents(parentNode);
             
