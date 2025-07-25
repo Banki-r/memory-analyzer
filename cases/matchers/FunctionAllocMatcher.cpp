@@ -5,22 +5,21 @@
 using namespace clang;
 using namespace clang::ast_matchers;
 
-class MallocMatcher : public IMatcher {
+class FunctionAllocMatcher : public IMatcher {
 private:
-  StatementMatcher _mMatcher =
+  StatementMatcher _aMatcher =
       declStmt(hasDescendant(varDecl().bind("var")),
-               hasDescendant(callExpr(callee(functionDecl(hasName("malloc"))))))
-          .bind("malloc");
-  StatementMatcher _fMatcher =
-      callExpr(callee(functionDecl(matchesName("free"))),
-               hasDescendant(implicitCastExpr(hasDescendant(implicitCastExpr(
-                   hasDescendant(declRefExpr().bind("var")))))))
-          .bind("free");
+               hasDescendant(callExpr(callee(functionDecl().bind("function")))))
+          .bind("allocNode");
+  StatementMatcher _dMatcher =
+      cxxDeleteExpr(hasDescendant(implicitCastExpr(
+                        hasDescendant(declRefExpr().bind("var")))))
+          .bind("delete");
   StatementMatcher _retMatcher =
       returnStmt(hasDescendant(declRefExpr().bind("retVar"))).bind("return");
 
   std::vector<AllocedPointer> _allocedPointers;
-  std::vector<StatementMatcher> _matchers = {_retMatcher, _mMatcher, _fMatcher};
+  std::vector<StatementMatcher> _matchers = {_retMatcher, _aMatcher, _dMatcher};
 
   void removeFromVector() {
 
@@ -32,27 +31,27 @@ private:
 
 public:
   virtual void run(const MatchFinder::MatchResult &result) override {
-    auto malloc = result.Nodes.getNodeAs<DeclStmt>("malloc");
-    auto mallocVar = result.Nodes.getNodeAs<VarDecl>("var");
+    auto allocNode = result.Nodes.getNodeAs<DeclStmt>("allocNode");
+    auto varNode = result.Nodes.getNodeAs<VarDecl>("var");
+    auto functionNode = result.Nodes.getNodeAs<FunctionDecl>("function");
 
-    auto free = result.Nodes.getNodeAs<CallExpr>("free");
-    auto freeVar = result.Nodes.getNodeAs<DeclRefExpr>("var");
+    auto deleteNode = result.Nodes.getNodeAs<CXXDeleteExpr>("delete");
+    auto deleteVar = result.Nodes.getNodeAs<DeclRefExpr>("var");
 
     auto retVar = result.Nodes.getNodeAs<DeclRefExpr>("retVar");
 
-    if (malloc && mallocVar) {
-      _allocFunc = getParentFunction(result, *malloc);
+    if (allocNode && varNode && functionNode &&
+        functionNode->getNameInfo().getAsString().find("malloc") ==
+            std::string::npos) {
+      _allocFunc = getParentFunction(result, *allocNode);
       AllocedPointer ap;
-      ap.allocLine = malloc->getBeginLoc().printToString(
+      ap.allocLine = allocNode->getBeginLoc().printToString(
           result.Context->getSourceManager());
-      ap.name = mallocVar->getNameAsString();
-      ap.freeLine = "";
-      _allocedPointers.push_back(ap);
-      // For debugging:
-
-      /*llvm::outs() << "Variable '" << ap.name << "' has been declared using a
-      malloc call"
-      << " at line " << ap.allocLine << "\n";*/
+      if (ap.allocLine.find(".cpp") != std::string::npos) {
+        ap.name = varNode->getNameAsString();
+        ap.freeLine = "";
+        _allocedPointers.push_back(ap);
+      }
     }
 
     if (retVar) {
@@ -64,15 +63,12 @@ public:
       }
     }
 
-    if (free) {
-      _reallocFunc = getParentFunction(result, *free);
+    if (deleteNode) {
+      _reallocFunc = getParentFunction(result, *deleteNode);
       if (_allocFunc == _reallocFunc) {
-        std::string varName = freeVar->getNameInfo().getAsString();
-        std::string freeLine = free->getBeginLoc().printToString(
+        std::string varName = deleteVar->getNameInfo().getAsString();
+        std::string freeLine = deleteNode->getBeginLoc().printToString(
             result.Context->getSourceManager());
-        // For debugging:
-        /*llvm::outs() << "Free found for variable: " << varName
-        << " at line: " << freeLine << "\n";*/
 
         for (size_t i = 0; i < _allocedPointers.size(); ++i) {
           if (_allocedPointers.at(i).name == varName) {
@@ -91,8 +87,8 @@ public:
     removeFromVector();
     for (AllocedPointer element : _allocedPointers) {
       llvm::outs() << "Variable " << element.name
-                   << " declared with a malloc call at: " << element.allocLine
-                   << ", is not freed up!\n";
+                   << " declared with a function call at: " << element.allocLine
+                   << ", is not deleted!\n";
     }
   }
 };

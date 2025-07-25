@@ -1,98 +1,90 @@
 #include "IMatcher.h"
-#include <vector>
 #include <datatypes/AllocedPointer.h>
+#include <vector>
 
 using namespace clang;
 using namespace clang::ast_matchers;
 
-class NewMatcher : public IMatcher
-{
+class NewMatcher : public IMatcher {
 private:
-    StatementMatcher _nMatcher = declStmt(hasDescendant(varDecl(hasDescendant(cxxNewExpr()))
-    .bind("var"))).bind("new");
-    StatementMatcher _dMatcher = cxxDeleteExpr(hasDescendant(implicitCastExpr(hasDescendant(declRefExpr()
-    .bind("var"))))).bind("delete");
-    StatementMatcher _retMatcher = returnStmt(hasDescendant(declRefExpr().bind("retVar"))).bind("return");
+  StatementMatcher _nMatcher =
+      declStmt(hasDescendant(varDecl(hasDescendant(cxxNewExpr())).bind("var")))
+          .bind("new");
+  StatementMatcher _dMatcher =
+      cxxDeleteExpr(hasDescendant(implicitCastExpr(
+                        hasDescendant(declRefExpr().bind("var")))))
+          .bind("delete");
+  StatementMatcher _retMatcher =
+      returnStmt(hasDescendant(declRefExpr().bind("retVar"))).bind("return");
 
-    std::vector<AllocedPointer> _allocedPointers;
-    std::vector<StatementMatcher> _matchers = {_retMatcher, _nMatcher, _dMatcher};
-    
-    void removeFromVector()
-    {
+  std::vector<AllocedPointer> _allocedPointers;
+  std::vector<StatementMatcher> _matchers = {_retMatcher, _nMatcher, _dMatcher};
 
-        _allocedPointers.erase(std::remove_if(_allocedPointers.begin(), 
-        _allocedPointers.end(), [](AllocedPointer i) { return !i.freeLine.empty();}),
+  void removeFromVector() {
+
+    _allocedPointers.erase(
+        std::remove_if(_allocedPointers.begin(), _allocedPointers.end(),
+                       [](AllocedPointer i) { return !i.freeLine.empty(); }),
         _allocedPointers.end());
-    }
+  }
+
 public:
-    
-    virtual void run(const MatchFinder::MatchResult &result) override
-    {
-        auto newNode = result.Nodes.getNodeAs<DeclStmt>("new");
-        auto newVar = result.Nodes.getNodeAs<VarDecl>("var");
+  virtual void run(const MatchFinder::MatchResult &result) override {
+    auto newNode = result.Nodes.getNodeAs<DeclStmt>("new");
+    auto newVar = result.Nodes.getNodeAs<VarDecl>("var");
 
-        auto deleteNode = result.Nodes.getNodeAs<CXXDeleteExpr>("delete");
-        auto deleteVar = result.Nodes.getNodeAs<DeclRefExpr>("var");
+    auto deleteNode = result.Nodes.getNodeAs<CXXDeleteExpr>("delete");
+    auto deleteVar = result.Nodes.getNodeAs<DeclRefExpr>("var");
 
-        auto retVar = result.Nodes.getNodeAs<DeclRefExpr>("retVar");
+    auto retVar = result.Nodes.getNodeAs<DeclRefExpr>("retVar");
 
-        if(newNode && newVar)
-        {
-            _allocFunc = getParentFunction(result, *newNode);
-            AllocedPointer ap;
-            ap.allocLine = newNode->getBeginLoc().printToString(result.Context->getSourceManager());
-            if(ap.allocLine.find(".cpp") != std::string::npos)
-            {
-                ap.name = newVar->getNameAsString();
-                ap.freeLine = "";
-                _allocedPointers.push_back(ap);
-            }
-        }
-
-        if(retVar)
-        {
-            auto retVarName = retVar->getNameInfo().getAsString();
-            for( size_t i = 0; i <_allocedPointers.size(); ++i)
-            {
-                if(_allocedPointers.at(i).name == retVarName)
-                {
-                    _allocedPointers.at(i).freeLine = "returned by function";
-                }
-            }
-        }
-        
-        if(deleteNode)
-        {
-            _reallocFunc = getParentFunction(result, *deleteNode);
-            if(_allocFunc == _reallocFunc)
-            {
-                std::string varName = deleteVar->getNameInfo().getAsString();
-                std::string freeLine = deleteNode->getBeginLoc().printToString(result.Context->getSourceManager());
-                
-                for( size_t i = 0; i <_allocedPointers.size(); ++i)
-                {
-                    if(_allocedPointers.at(i).name == varName)
-                    {
-                        _allocedPointers.at(i).freeLine = freeLine;
-                    }
-                }
-            }
-        }
+    if (newNode && newVar) {
+      _allocFunc = getParentFunction(result, *newNode);
+      AllocedPointer ap;
+      ap.allocLine = newNode->getBeginLoc().printToString(
+          result.Context->getSourceManager());
+      if (ap.allocLine.find(".cpp") != std::string::npos) {
+        ap.name = newVar->getNameAsString();
+        ap.freeLine = "";
+        _allocedPointers.push_back(ap);
+      }
     }
 
-    virtual std::vector<StatementMatcher> getMatchers() override
-    {
-        return _matchers;
+    if (retVar) {
+      auto retVarName = retVar->getNameInfo().getAsString();
+      for (size_t i = 0; i < _allocedPointers.size(); ++i) {
+        if (_allocedPointers.at(i).name == retVarName) {
+          _allocedPointers.at(i).freeLine = "returned by function";
+        }
+      }
     }
 
-    virtual void writeOutput() override 
-    {
-        removeFromVector();
-        for(AllocedPointer element : _allocedPointers)
-        {
-            llvm::outs() << "Variable " << element.name
-            << " declared with new call at: " << element.allocLine 
-            << " , is not deleted!\n";
+    if (deleteNode) {
+      _reallocFunc = getParentFunction(result, *deleteNode);
+      if (_allocFunc == _reallocFunc) {
+        std::string varName = deleteVar->getNameInfo().getAsString();
+        std::string freeLine = deleteNode->getBeginLoc().printToString(
+            result.Context->getSourceManager());
+
+        for (size_t i = 0; i < _allocedPointers.size(); ++i) {
+          if (_allocedPointers.at(i).name == varName) {
+            _allocedPointers.at(i).freeLine = freeLine;
+          }
         }
+      }
     }
+  }
+
+  virtual std::vector<StatementMatcher> getMatchers() override {
+    return _matchers;
+  }
+
+  virtual void writeOutput() override {
+    removeFromVector();
+    for (AllocedPointer element : _allocedPointers) {
+      llvm::outs() << "Variable " << element.name
+                   << " declared with new call at: " << element.allocLine
+                   << ", is not deleted!\n";
+    }
+  }
 };

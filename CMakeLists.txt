@@ -14,6 +14,7 @@ add_clang_executable(memory-analyzer
     cases/matchers/MallocMatcher.cpp
     cases/matchers/NewMatcher.cpp
     cases/matchers/ReAllocMatcher.cpp
+    cases/matchers/FunctionAllocMatcher.cpp
     cases/matchers/IMatcher.h
     cases/visitors/IASTVisitor.h
 )
