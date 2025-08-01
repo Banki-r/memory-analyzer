@@ -1,5 +1,5 @@
 #include "IMatcher.h"
-#include <datatypes/AllocedPointer.h>
+#include <datatypes/CastedPointer.h>
 #include <vector>
 
 using namespace clang;
@@ -14,18 +14,25 @@ private:
       cxxDeleteExpr(hasDescendant(implicitCastExpr(
                         hasDescendant(declRefExpr().bind("var")))))
           .bind("delete");
+  StatementMatcher _castMatcher =
+      declStmt(hasDescendant(varDecl(hasDescendant(implicitCastExpr(
+                   hasDescendant(declRefExpr().bind("castedVar")))))))
+          .bind("castedNode");
   StatementMatcher _retMatcher =
       returnStmt(hasDescendant(declRefExpr().bind("retVar"))).bind("return");
 
-  std::vector<AllocedPointer> _allocedPointers;
-  std::vector<StatementMatcher> _matchers = {_retMatcher, _nMatcher, _dMatcher};
+  std::vector<CastedPointer> _castedPointers;
+  std::vector<StatementMatcher> _matchers = {_retMatcher, _nMatcher,
+                                             _castMatcher, _dMatcher};
 
   void removeFromVector() {
 
-    _allocedPointers.erase(
-        std::remove_if(_allocedPointers.begin(), _allocedPointers.end(),
-                       [](AllocedPointer i) { return !i.freeLine.empty(); }),
-        _allocedPointers.end());
+    _castedPointers.erase(
+        std::remove_if(_castedPointers.begin(), _castedPointers.end(),
+                       [](CastedPointer i) {
+                         return !i.freeLine.empty() && i.recastLine.empty();
+                       }),
+        _castedPointers.end());
   }
 
 public:
@@ -36,25 +43,40 @@ public:
     auto deleteNode = result.Nodes.getNodeAs<CXXDeleteExpr>("delete");
     auto deleteVar = result.Nodes.getNodeAs<DeclRefExpr>("var");
 
+    auto castedNode = result.Nodes.getNodeAs<DeclStmt>("castedNode");
+    auto castedVar = result.Nodes.getNodeAs<DeclRefExpr>("castedVar");
+
     auto retVar = result.Nodes.getNodeAs<DeclRefExpr>("retVar");
 
     if (newNode && newVar) {
       _allocFunc = getParentFunction(result, *newNode);
-      AllocedPointer ap;
+      CastedPointer ap;
       ap.allocLine = newNode->getBeginLoc().printToString(
           result.Context->getSourceManager());
       if (ap.allocLine.find(".cpp") != std::string::npos) {
         ap.name = newVar->getNameAsString();
         ap.freeLine = "";
-        _allocedPointers.push_back(ap);
+        _castedPointers.push_back(ap);
+      }
+    }
+
+    if (castedNode && castedVar) {
+      std::string castedVarName =
+          castedVar->getNameInfo().getName().getAsString();
+      std::string recastedLine = castedNode->getBeginLoc().printToString(
+          result.Context->getSourceManager());
+      for (size_t i = 0; i < _castedPointers.size(); ++i) {
+        if (_castedPointers.at(i).name == castedVarName) {
+          _castedPointers.at(i).recastLine = recastedLine;
+        }
       }
     }
 
     if (retVar) {
       auto retVarName = retVar->getNameInfo().getAsString();
-      for (size_t i = 0; i < _allocedPointers.size(); ++i) {
-        if (_allocedPointers.at(i).name == retVarName) {
-          _allocedPointers.at(i).freeLine = "returned by function";
+      for (size_t i = 0; i < _castedPointers.size(); ++i) {
+        if (_castedPointers.at(i).name == retVarName) {
+          _castedPointers.at(i).freeLine = "returned by function";
         }
       }
     }
@@ -66,9 +88,9 @@ public:
         std::string freeLine = deleteNode->getBeginLoc().printToString(
             result.Context->getSourceManager());
 
-        for (size_t i = 0; i < _allocedPointers.size(); ++i) {
-          if (_allocedPointers.at(i).name == varName) {
-            _allocedPointers.at(i).freeLine = freeLine;
+        for (size_t i = 0; i < _castedPointers.size(); ++i) {
+          if (_castedPointers.at(i).name == varName) {
+            _castedPointers.at(i).freeLine = freeLine;
           }
         }
       }
@@ -81,10 +103,17 @@ public:
 
   virtual void writeOutput() override {
     removeFromVector();
-    for (AllocedPointer element : _allocedPointers) {
-      llvm::outs() << "Variable " << element.name
-                   << " declared with new call at: " << element.allocLine
-                   << ", is not deleted!\n";
+    for (CastedPointer element : _castedPointers) {
+      if (element.freeLine.empty()) {
+        llvm::outs() << "Variable " << element.name
+                     << " declared with new call at: " << element.allocLine
+                     << ", is not deleted!\n";
+      }
+      if (!element.recastLine.empty()) {
+        llvm::outs() << "Variable " << element.name
+                     << " declared with new call at: " << element.allocLine
+                     << ", is recasted at: " << element.recastLine << "!\n";
+      }
     }
   }
 };
