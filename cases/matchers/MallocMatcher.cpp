@@ -41,8 +41,8 @@ public:
     auto retVar = result.Nodes.getNodeAs<DeclRefExpr>("retVar");
 
     if (malloc && mallocVar) {
-      _allocFunc = getParentFunction(result, *malloc);
       AllocedPointer ap;
+      ap.allocFunc = getParentFunction(result, *malloc)->getNameAsString();
       ap.allocLine = malloc->getBeginLoc().printToString(
           result.Context->getSourceManager());
       ap.name = mallocVar->getNameAsString();
@@ -65,19 +65,19 @@ public:
     }
 
     if (free) {
-      _reallocFunc = getParentFunction(result, *free);
-      if (_allocFunc == _reallocFunc) {
-        std::string varName = freeVar->getNameInfo().getAsString();
-        std::string freeLine = free->getBeginLoc().printToString(
-            result.Context->getSourceManager());
-        // For debugging:
-        /*llvm::outs() << "Free found for variable: " << varName
-        << " at line: " << freeLine << "\n";*/
+      std::string freeFunc =
+          getParentFunction(result, *free)->getNameAsString();
+      std::string varName = freeVar->getNameInfo().getAsString();
+      std::string freeLine =
+          free->getBeginLoc().printToString(result.Context->getSourceManager());
+      // For debugging:
+      /*llvm::outs() << "Free found for variable: " << varName
+      << " at line: " << freeLine << "\n";*/
 
-        for (size_t i = 0; i < _allocedPointers.size(); ++i) {
-          if (_allocedPointers.at(i).name == varName) {
-            _allocedPointers.at(i).freeLine = freeLine;
-          }
+      for (size_t i = 0; i < _allocedPointers.size(); ++i) {
+        if (_allocedPointers.at(i).name == varName &&
+            _allocedPointers.at(i).allocFunc == freeFunc) {
+          _allocedPointers.at(i).freeLine = freeLine;
         }
       }
     }

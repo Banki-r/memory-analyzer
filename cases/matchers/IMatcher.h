@@ -9,9 +9,6 @@ using namespace clang::ast_matchers;
 
 class IMatcher : public MatchFinder::MatchCallback {
 protected:
-  const FunctionDecl *_allocFunc;
-  const FunctionDecl *_reallocFunc;
-
   template <typename T>
   const FunctionDecl *getParentFunction(const MatchFinder::MatchResult &result,
                                         T &Node) {

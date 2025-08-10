@@ -34,8 +34,8 @@ public:
     auto reallocVar = result.Nodes.getNodeAs<DeclRefExpr>("var");
 
     if (allocNode && allocVar) {
-      _allocFunc = getParentFunction(result, *allocNode);
       ReAllocedPointer ap;
+      ap.allocFunc = getParentFunction(result, *allocNode)->getNameAsString();
       ap.allocLine = allocNode->getBeginLoc().printToString(
           result.Context->getSourceManager());
       QualType type = allocVar->getType();
@@ -49,16 +49,15 @@ public:
     }
 
     if (reallocNode && reallocNode->isAssignmentOp()) {
-      _reallocFunc = getParentFunction(result, *reallocNode);
-      if (_allocFunc == _reallocFunc) {
-        std::string varName = reallocVar->getNameInfo().getAsString();
-        std::string reallocLine = reallocNode->getBeginLoc().printToString(
-            result.Context->getSourceManager());
-
-        for (size_t i = 0; i < _reAllocedPointers.size(); ++i) {
-          if (_reAllocedPointers.at(i).name == varName) {
-            _reAllocedPointers.at(i).reAllocedLine = reallocLine;
-          }
+      std::string reallocFunc =
+          getParentFunction(result, *reallocNode)->getNameAsString();
+      std::string varName = reallocVar->getNameInfo().getAsString();
+      std::string reallocLine = reallocNode->getBeginLoc().printToString(
+          result.Context->getSourceManager());
+      for (size_t i = 0; i < _reAllocedPointers.size(); ++i) {
+        if (_reAllocedPointers.at(i).name == varName &&
+            _reAllocedPointers.at(i).allocFunc == reallocFunc) {
+          _reAllocedPointers.at(i).reAllocedLine = reallocLine;
         }
       }
     }

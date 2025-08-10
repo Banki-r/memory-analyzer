@@ -49,8 +49,8 @@ public:
     auto retVar = result.Nodes.getNodeAs<DeclRefExpr>("retVar");
 
     if (newNode && newVar) {
-      _allocFunc = getParentFunction(result, *newNode);
       CastedPointer ap;
+      ap.allocFunc = getParentFunction(result, *newNode)->getNameAsString();
       ap.allocLine = newNode->getBeginLoc().printToString(
           result.Context->getSourceManager());
       if (ap.allocLine.find(".cpp") != std::string::npos) {
@@ -82,16 +82,16 @@ public:
     }
 
     if (deleteNode) {
-      _reallocFunc = getParentFunction(result, *deleteNode);
-      if (_allocFunc == _reallocFunc) {
-        std::string varName = deleteVar->getNameInfo().getAsString();
-        std::string freeLine = deleteNode->getBeginLoc().printToString(
-            result.Context->getSourceManager());
+      std::string deleteFunc =
+          getParentFunction(result, *deleteNode)->getNameAsString();
+      std::string varName = deleteVar->getNameInfo().getAsString();
+      std::string freeLine = deleteNode->getBeginLoc().printToString(
+          result.Context->getSourceManager());
 
-        for (size_t i = 0; i < _castedPointers.size(); ++i) {
-          if (_castedPointers.at(i).name == varName) {
-            _castedPointers.at(i).freeLine = freeLine;
-          }
+      for (size_t i = 0; i < _castedPointers.size(); ++i) {
+        if (_castedPointers.at(i).name == varName &&
+            _castedPointers.at(i).allocFunc == deleteFunc) {
+          _castedPointers.at(i).freeLine = freeLine;
         }
       }
     }
