@@ -41,7 +41,8 @@ public:
     auto retVar = result.Nodes.getNodeAs<DeclRefExpr>("retVar");
 
     if (malloc && mallocVar) {
-      if (result.Context->getSourceManager().isWrittenInMainFile(malloc->getBeginLoc())) {
+      if (result.Context->getSourceManager().isWrittenInMainFile(
+              malloc->getBeginLoc())) {
         AllocedPointer ap;
         ap.allocFunc = getParentFunction(result, *malloc)->getNameAsString();
         ap.allocLine = malloc->getBeginLoc().printToString(

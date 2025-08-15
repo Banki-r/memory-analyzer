@@ -5,12 +5,12 @@
 #include <clang/ASTMatchers/ASTMatchFinder.h>
 #include <clang/Frontend/CompilerInstance.h>
 
-#include <cases/matchers/UninitializedMatcher.cpp>
 #include <cases/matchers/FunctionAllocMatcher.cpp>
 #include <cases/matchers/IMatcher.h>
 #include <cases/matchers/MallocMatcher.cpp>
 #include <cases/matchers/NewMatcher.cpp>
 #include <cases/matchers/ReAllocMatcher.cpp>
+#include <cases/matchers/UninitializedMatcher.cpp>
 #include <cases/visitors/IASTVisitor.h>
 
 class ASTConsumerWrapper : public clang::ASTConsumer {

@@ -43,11 +43,12 @@ public:
     if (allocNode && varNode && functionNode &&
         functionNode->getNameInfo().getAsString().find("malloc") ==
             std::string::npos) {
-      if (result.Context->getSourceManager().isWrittenInMainFile(allocNode->getBeginLoc())) {
+      if (result.Context->getSourceManager().isWrittenInMainFile(
+              allocNode->getBeginLoc())) {
         AllocedPointer ap;
         ap.allocFunc = getParentFunction(result, *allocNode)->getNameAsString();
         ap.allocLine = allocNode->getBeginLoc().printToString(
-          result.Context->getSourceManager());
+            result.Context->getSourceManager());
         ap.name = varNode->getNameAsString();
         ap.freeLine = "";
         _allocedPointers.push_back(ap);

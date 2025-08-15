@@ -19,8 +19,10 @@ public:
     auto allocVar = result.Nodes.getNodeAs<VarDecl>("var");
 
     if (allocNode && allocVar) {
-      if (result.Context->getSourceManager().isWrittenInMainFile(allocNode->getBeginLoc()) &&
-         allocVar->getType().getTypePtr()->isPointerType() && !allocVar->hasInit()) {
+      if (result.Context->getSourceManager().isWrittenInMainFile(
+              allocNode->getBeginLoc()) &&
+          allocVar->getType().getTypePtr()->isPointerType() &&
+          !allocVar->hasInit()) {
         UninitializedPointer up;
         up.allocLine = allocNode->getBeginLoc().printToString(
             result.Context->getSourceManager());
@@ -37,7 +39,8 @@ public:
   virtual void writeOutput() override {
     for (UninitializedPointer element : _uninitializedPointers) {
       llvm::outs() << "Pointer " << element.name
-                   << " is not initialized at declaration: " << element.allocLine << " !\n";
+                   << " is not initialized at declaration: "
+                   << element.allocLine << " !\n";
     }
   }
 };

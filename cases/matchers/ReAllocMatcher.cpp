@@ -34,8 +34,9 @@ public:
     auto reallocVar = result.Nodes.getNodeAs<DeclRefExpr>("var");
 
     if (allocNode && allocVar) {
-      if (result.Context->getSourceManager().isWrittenInMainFile(allocNode->getBeginLoc()) &&
-         allocVar->getType().getTypePtr()->isPointerType()) {
+      if (result.Context->getSourceManager().isWrittenInMainFile(
+              allocNode->getBeginLoc()) &&
+          allocVar->getType().getTypePtr()->isPointerType()) {
         ReAllocedPointer ap;
         ap.allocFunc = getParentFunction(result, *allocNode)->getNameAsString();
         ap.allocLine = allocNode->getBeginLoc().printToString(

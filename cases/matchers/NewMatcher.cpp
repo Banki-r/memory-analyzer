@@ -49,12 +49,13 @@ public:
     auto retVar = result.Nodes.getNodeAs<DeclRefExpr>("retVar");
 
     if (newNode && newVar) {
-      if (result.Context->getSourceManager().isWrittenInMainFile(newNode->getBeginLoc())) {
+      if (result.Context->getSourceManager().isWrittenInMainFile(
+              newNode->getBeginLoc())) {
         CastedPointer ap;
         ap.allocFunc = getParentFunction(result, *newNode)->getNameAsString();
         ap.allocLine = newNode->getBeginLoc().printToString(
-          result.Context->getSourceManager());
-      
+            result.Context->getSourceManager());
+
         ap.name = newVar->getNameAsString();
         ap.freeLine = "";
         _castedPointers.push_back(ap);
