@@ -34,14 +34,12 @@ public:
     auto reallocVar = result.Nodes.getNodeAs<DeclRefExpr>("var");
 
     if (allocNode && allocVar) {
-      ReAllocedPointer ap;
-      ap.allocFunc = getParentFunction(result, *allocNode)->getNameAsString();
-      ap.allocLine = allocNode->getBeginLoc().printToString(
-          result.Context->getSourceManager());
-      QualType type = allocVar->getType();
-      std::string typeString = type.getAsString();
-      if (ap.allocLine.find(".cpp") != std::string::npos &&
-          typeString.find("*") != std::string::npos) {
+      if (result.Context->getSourceManager().isWrittenInMainFile(allocNode->getBeginLoc()) &&
+         allocVar->getType().getTypePtr()->isPointerType()) {
+        ReAllocedPointer ap;
+        ap.allocFunc = getParentFunction(result, *allocNode)->getNameAsString();
+        ap.allocLine = allocNode->getBeginLoc().printToString(
+            result.Context->getSourceManager());
         ap.name = allocVar->getNameAsString();
         ap.reAllocedLine = "";
         _reAllocedPointers.push_back(ap);

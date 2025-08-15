@@ -49,11 +49,12 @@ public:
     auto retVar = result.Nodes.getNodeAs<DeclRefExpr>("retVar");
 
     if (newNode && newVar) {
-      CastedPointer ap;
-      ap.allocFunc = getParentFunction(result, *newNode)->getNameAsString();
-      ap.allocLine = newNode->getBeginLoc().printToString(
+      if (result.Context->getSourceManager().isWrittenInMainFile(newNode->getBeginLoc())) {
+        CastedPointer ap;
+        ap.allocFunc = getParentFunction(result, *newNode)->getNameAsString();
+        ap.allocLine = newNode->getBeginLoc().printToString(
           result.Context->getSourceManager());
-      if (ap.allocLine.find(".cpp") != std::string::npos) {
+      
         ap.name = newVar->getNameAsString();
         ap.freeLine = "";
         _castedPointers.push_back(ap);

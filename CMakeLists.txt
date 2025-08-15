@@ -12,10 +12,12 @@ add_clang_executable(memory-analyzer
     datatypes/AllocedPointer.h
     datatypes/ReAllocedPointer.h
     datatypes/CastedPointer.h
+    datatypes/UninitializedPointer.h
     cases/matchers/MallocMatcher.cpp
     cases/matchers/NewMatcher.cpp
     cases/matchers/ReAllocMatcher.cpp
     cases/matchers/FunctionAllocMatcher.cpp
+    cases/matchers/UninitializedMatcher.cpp
     cases/matchers/IMatcher.h
     cases/visitors/IASTVisitor.h
 )

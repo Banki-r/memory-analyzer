@@ -41,13 +41,15 @@ public:
     auto retVar = result.Nodes.getNodeAs<DeclRefExpr>("retVar");
 
     if (malloc && mallocVar) {
-      AllocedPointer ap;
-      ap.allocFunc = getParentFunction(result, *malloc)->getNameAsString();
-      ap.allocLine = malloc->getBeginLoc().printToString(
-          result.Context->getSourceManager());
-      ap.name = mallocVar->getNameAsString();
-      ap.freeLine = "";
-      _allocedPointers.push_back(ap);
+      if (result.Context->getSourceManager().isWrittenInMainFile(malloc->getBeginLoc())) {
+        AllocedPointer ap;
+        ap.allocFunc = getParentFunction(result, *malloc)->getNameAsString();
+        ap.allocLine = malloc->getBeginLoc().printToString(
+            result.Context->getSourceManager());
+        ap.name = mallocVar->getNameAsString();
+        ap.freeLine = "";
+        _allocedPointers.push_back(ap);
+      }
       // For debugging:
 
       /*llvm::outs() << "Variable '" << ap.name << "' has been declared using a
