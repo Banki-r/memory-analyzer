@@ -4,11 +4,10 @@
 #include <clang/AST/RecursiveASTVisitor.h>
 #include <vector>
 
-class IASTVisitor : public clang::RecursiveASTVisitor<IASTVisitor> {
-private:
+template <typename T> class IASTVisitor : public clang::RecursiveASTVisitor<T> {
+public:
   clang::ASTContext *_context;
 
-public:
   std::string locStr(clang::SourceLocation loc) {
     return loc.printToString(_context->getSourceManager());
   }

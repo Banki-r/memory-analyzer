@@ -12,6 +12,7 @@
 #include <cases/matchers/ReAllocMatcher.cpp>
 #include <cases/matchers/UninitializedMatcher.cpp>
 #include <cases/visitors/IASTVisitor.h>
+#include <cases/visitors/VectorVisitor.cpp>
 
 class ASTConsumerWrapper : public clang::ASTConsumer {
 private:
@@ -19,6 +20,8 @@ private:
   clang::ast_matchers::MatchFinder _matchFinder;
   clang::SourceManager &_sourceManager;
   std::vector<std::unique_ptr<IMatcher>> _matchers;
+
+  VectorVisitor vVisitor;
 
   void constructMatchers();
 

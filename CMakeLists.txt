@@ -13,6 +13,8 @@ add_clang_executable(memory-analyzer
     datatypes/ReAllocedPointer.h
     datatypes/CastedPointer.h
     datatypes/UninitializedPointer.h
+    datatypes/VisitedVector.h
+    datatypes/MemberLoc.h
     cases/matchers/MallocMatcher.cpp
     cases/matchers/NewMatcher.cpp
     cases/matchers/ReAllocMatcher.cpp
@@ -20,6 +22,7 @@ add_clang_executable(memory-analyzer
     cases/matchers/UninitializedMatcher.cpp
     cases/matchers/IMatcher.h
     cases/visitors/IASTVisitor.h
+    cases/visitors/VectorVisitor.cpp
 )
 
 target_link_libraries(memory-analyzer
