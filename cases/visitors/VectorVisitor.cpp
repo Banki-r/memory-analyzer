@@ -5,11 +5,17 @@
 
 class VectorVisitor : public IASTVisitor<VectorVisitor> {
 private:
-  std::vector<VisitedVector> visitedVectors;
-  std::vector<MemberLoc> memberLocs;
+  std::vector<VisitedVector> *_visitedVectors;
+  std::vector<MemberLoc> *_memberLocs;
 
 public:
-  VectorVisitor(clang::ASTContext *context) { _context = context; }
+  VectorVisitor(clang::ASTContext *context,
+                std::vector<VisitedVector> *visitedVectors,
+                std::vector<MemberLoc> *memberLocs) {
+    _visitedVectors = visitedVectors;
+    _memberLocs = memberLocs;
+    _context = context;
+  }
 
   // visits the alloc line
   bool VisitVarDecl(const clang::VarDecl *decl) {
@@ -22,7 +28,7 @@ public:
       VisitedVector vv;
       vv.objName = decl->getNameAsString();
       vv.allocedLine = locStr(decl->getBeginLoc());
-      visitedVectors.push_back(vv);
+      _visitedVectors->push_back(vv);
     }
     return true;
   }
@@ -34,7 +40,7 @@ public:
       MemberLoc ml;
       ml.loc = locStr(memberExpr->getBeginLoc());
       ml.deletable = false;
-      memberLocs.push_back(ml);
+      _memberLocs->push_back(ml);
     }
     return true;
   }
@@ -43,32 +49,31 @@ public:
     if (declref->getType().getAsString().find("std::vector") !=
         std::string::npos) {
       // check if there is a push_back or insert on a vector
-      for (auto ins : memberLocs) {
-        if (ins.loc == locStr(declref->getBeginLoc())) {
+      for (std::vector<MemberLoc>::iterator memit = _memberLocs->begin(),
+                                            memend = _memberLocs->end();
+           memit != memend; ++memit) {
+        if (memit.base()->loc == locStr(declref->getBeginLoc())) {
           // check which vector that is
-          for (auto vector : visitedVectors) {
-            if (vector.objName == declref->getNameInfo().getAsString()) {
+          for (std::vector<VisitedVector>::iterator
+                   vecit = _visitedVectors->begin(),
+                   vecend = _visitedVectors->end();
+               vecit != vecend; ++vecit) {
+            if (vecit.base()->objName == declref->getNameInfo().getAsString()) {
               // increment the number of push_back or insert
               // and prepare for deletion of MemberLoc
-              vector.push_backs += 1;
-              ins.deletable = true;
+              vecit.base()->push_backs += 1;
+              memit.base()->deletable = true;
             }
           }
         }
       }
 
       // delete the found memberLoc from the vector
-      memberLocs.erase(std::remove_if(memberLocs.begin(), memberLocs.end(),
-                                      [](MemberLoc i) { return i.deletable; }),
-                       memberLocs.end());
+      _memberLocs->erase(
+          std::remove_if(_memberLocs->begin(), _memberLocs->end(),
+                         [](MemberLoc i) { return i.deletable; }),
+          _memberLocs->end());
     }
     return true;
-  }
-
-  void printNotDeletedVectors() {
-    for (auto i : visitedVectors) {
-      llvm::outs() << i.objName << " vector at " << i.allocedLine
-                   << ", is not deleted properly.\n";
-    }
   }
 };

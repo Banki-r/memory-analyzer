@@ -20,6 +20,7 @@ add_clang_executable(memory-analyzer
     cases/matchers/ReAllocMatcher.cpp
     cases/matchers/FunctionAllocMatcher.cpp
     cases/matchers/UninitializedMatcher.cpp
+    cases/matchers/VectorMatcher.cpp
     cases/matchers/IMatcher.h
     cases/visitors/IASTVisitor.h
     cases/visitors/VectorVisitor.cpp

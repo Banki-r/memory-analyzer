@@ -4,7 +4,8 @@
 
 ASTConsumerWrapper::ASTConsumerWrapper(clang::ASTContext *context,
                                        clang::SourceManager &sourceManager)
-    : _context(context), _sourceManager(sourceManager), vVisitor(context) {
+    : _context(context), _sourceManager(sourceManager),
+      vVisitor(context, &_visitedVectors, &_memberLocs) {
   constructMatchers();
   for (size_t i = 0; i < _matchers.size(); ++i) {
     std::vector<clang::ast_matchers::StatementMatcher> matchers =
@@ -23,8 +24,6 @@ void ASTConsumerWrapper::HandleTranslationUnit(clang::ASTContext &ctx) {
   for (auto &matcher : _matchers) {
     matcher->writeOutput();
   }
-
-  vVisitor.printNotDeletedVectors();
 }
 
 // edit this function if a new Matcher is created,
@@ -35,4 +34,7 @@ void ASTConsumerWrapper::constructMatchers() {
   _matchers.push_back(std::make_unique<ReAllocMatcher>());
   _matchers.push_back(std::make_unique<FunctionAllocMatcher>());
   _matchers.push_back(std::make_unique<UninitializedMatcher>());
+  auto vectorMatcher = std::make_unique<VectorMatcher>();
+  vectorMatcher.get()->setVisitedVectors(&_visitedVectors);
+  _matchers.push_back(std::move(vectorMatcher));
 }

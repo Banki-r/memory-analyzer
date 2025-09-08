@@ -40,7 +40,7 @@ public:
 
     auto retVar = result.Nodes.getNodeAs<DeclRefExpr>("retVar");
 
-    if (allocNode && varNode && functionNode &&
+    if (allocNode && varNode && functionNode && !varNode->isImplicit() &&
         functionNode->getNameInfo().getAsString().find("malloc") ==
             std::string::npos) {
       if (result.Context->getSourceManager().isWrittenInMainFile(

@@ -11,6 +11,7 @@
 #include <cases/matchers/NewMatcher.cpp>
 #include <cases/matchers/ReAllocMatcher.cpp>
 #include <cases/matchers/UninitializedMatcher.cpp>
+#include <cases/matchers/VectorMatcher.cpp>
 #include <cases/visitors/IASTVisitor.h>
 #include <cases/visitors/VectorVisitor.cpp>
 
@@ -22,6 +23,8 @@ private:
   std::vector<std::unique_ptr<IMatcher>> _matchers;
 
   VectorVisitor vVisitor;
+  std::vector<VisitedVector> _visitedVectors;
+  std::vector<MemberLoc> _memberLocs;
 
   void constructMatchers();
 

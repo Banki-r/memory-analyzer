@@ -4,7 +4,6 @@
 struct VisitedVector {
   std::string objName;
   std::string allocedLine;
-  int push_backs;
-  int frees;
-  bool deletedCorrectly;
+  int push_backs = 0;
+  int frees = 0;
 };
