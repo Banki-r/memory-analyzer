@@ -1,7 +1,7 @@
 #pragma once
 #include <iostream>
 
-struct VisitedVector {
+struct VisitedContainer {
   std::string objName;
   std::string allocedLine;
   int push_backs = 0;

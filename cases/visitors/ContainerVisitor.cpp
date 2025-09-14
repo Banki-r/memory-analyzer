@@ -1,20 +1,32 @@
 #include "IASTVisitor.h"
 #include "datatypes/MemberLoc.h"
-#include "datatypes/VisitedVector.h"
+#include "datatypes/VisitedContainer.h"
 #include "clang/Basic/SourceManager.h"
 
-class VectorVisitor : public IASTVisitor<VectorVisitor> {
+class ContainerVisitor : public IASTVisitor<ContainerVisitor> {
 private:
-  std::vector<VisitedVector> *_visitedVectors;
+  std::vector<VisitedContainer> *_VisitedContainers;
   std::vector<MemberLoc> *_memberLocs;
 
 public:
-  VectorVisitor(clang::ASTContext *context,
-                std::vector<VisitedVector> *visitedVectors,
+  ContainerVisitor(clang::ASTContext *context,
+                std::vector<VisitedContainer> *VisitedContainers,
                 std::vector<MemberLoc> *memberLocs) {
-    _visitedVectors = visitedVectors;
+    _VisitedContainers = VisitedContainers;
     _memberLocs = memberLocs;
     _context = context;
+  }
+
+  bool isItAContainer(std::string str)
+  {
+    bool isVector = (str.find("std::vector") != std::string::npos ||
+         str.find("vector") != std::string::npos);
+    bool isDeque = (str.find("std::deque") != std::string::npos ||
+         str.find("deque") != std::string::npos);
+    bool isList = (str.find("std::list") != std::string::npos ||
+         str.find("list") != std::string::npos);
+
+    return isVector || isDeque || isList;
   }
 
   // visits the alloc line
@@ -22,13 +34,15 @@ public:
 
     clang::QualType type = decl->getType();
     std::string typeAsString = type.getAsString();
+    //check for std containers
+    
     if (_context->getSourceManager().isWrittenInMainFile(decl->getBeginLoc()) &&
-        (typeAsString.find("std::vector") != std::string::npos ||
-         typeAsString.find("vector") != std::string::npos)) {
-      VisitedVector vv;
+        isItAContainer(typeAsString)) {
+      VisitedContainer vv;
       vv.objName = decl->getNameAsString();
+      llvm::outs() << vv.objName << " is an OBJNAME \n";
       vv.allocedLine = locStr(decl->getBeginLoc());
-      _visitedVectors->push_back(vv);
+      _VisitedContainers->push_back(vv);
     }
     return true;
   }
@@ -46,17 +60,16 @@ public:
   }
 
   bool VisitDeclRefExpr(const clang::DeclRefExpr *declref) {
-    if (declref->getType().getAsString().find("std::vector") !=
-        std::string::npos) {
+    if (isItAContainer(declref->getType().getAsString())) {
       // check if there is a push_back or insert on a vector
       for (std::vector<MemberLoc>::iterator memit = _memberLocs->begin(),
                                             memend = _memberLocs->end();
            memit != memend; ++memit) {
         if (memit.base()->loc == locStr(declref->getBeginLoc())) {
           // check which vector that is
-          for (std::vector<VisitedVector>::iterator
-                   vecit = _visitedVectors->begin(),
-                   vecend = _visitedVectors->end();
+          for (std::vector<VisitedContainer>::iterator
+                   vecit = _VisitedContainers->begin(),
+                   vecend = _VisitedContainers->end();
                vecit != vecend; ++vecit) {
             if (vecit.base()->objName == declref->getNameInfo().getAsString()) {
               // increment the number of push_back or insert

@@ -11,9 +11,9 @@
 #include <cases/matchers/NewMatcher.cpp>
 #include <cases/matchers/ReAllocMatcher.cpp>
 #include <cases/matchers/UninitializedMatcher.cpp>
-#include <cases/matchers/VectorMatcher.cpp>
+#include <cases/matchers/ContainerMatcher.cpp>
 #include <cases/visitors/IASTVisitor.h>
-#include <cases/visitors/VectorVisitor.cpp>
+#include <cases/visitors/ContainerVisitor.cpp>
 
 class ASTConsumerWrapper : public clang::ASTConsumer {
 private:
@@ -22,8 +22,8 @@ private:
   clang::SourceManager &_sourceManager;
   std::vector<std::unique_ptr<IMatcher>> _matchers;
 
-  VectorVisitor vVisitor;
-  std::vector<VisitedVector> _visitedVectors;
+  ContainerVisitor vVisitor;
+  std::vector<VisitedContainer> _VisitedContainers;
   std::vector<MemberLoc> _memberLocs;
 
   void constructMatchers();
