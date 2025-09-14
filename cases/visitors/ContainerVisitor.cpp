@@ -10,21 +10,20 @@ private:
 
 public:
   ContainerVisitor(clang::ASTContext *context,
-                std::vector<VisitedContainer> *VisitedContainers,
-                std::vector<MemberLoc> *memberLocs) {
+                   std::vector<VisitedContainer> *VisitedContainers,
+                   std::vector<MemberLoc> *memberLocs) {
     _VisitedContainers = VisitedContainers;
     _memberLocs = memberLocs;
     _context = context;
   }
 
-  bool isItAContainer(std::string str)
-  {
+  bool isItAContainer(std::string str) {
     bool isVector = (str.find("std::vector") != std::string::npos ||
-         str.find("vector") != std::string::npos);
+                     str.find("vector") != std::string::npos);
     bool isDeque = (str.find("std::deque") != std::string::npos ||
-         str.find("deque") != std::string::npos);
+                    str.find("deque") != std::string::npos);
     bool isList = (str.find("std::list") != std::string::npos ||
-         str.find("list") != std::string::npos);
+                   str.find("list") != std::string::npos);
 
     return isVector || isDeque || isList;
   }
@@ -34,8 +33,8 @@ public:
 
     clang::QualType type = decl->getType();
     std::string typeAsString = type.getAsString();
-    //check for std containers
-    
+    // check for std containers
+
     if (_context->getSourceManager().isWrittenInMainFile(decl->getBeginLoc()) &&
         isItAContainer(typeAsString)) {
       VisitedContainer vv;

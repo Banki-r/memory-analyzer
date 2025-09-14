@@ -19,10 +19,12 @@ private:
   std::vector<StatementMatcher> _matchers = {_cMatcher, _dMatcher};
 
   void removeFromVector() {
-    _VisitedContainers->erase(
-        std::remove_if(_VisitedContainers->begin(), _VisitedContainers->end(),
-                       [](VisitedContainer i) { return i.frees == i.push_backs; }),
-        _VisitedContainers->end());
+    _VisitedContainers->erase(std::remove_if(_VisitedContainers->begin(),
+                                             _VisitedContainers->end(),
+                                             [](VisitedContainer i) {
+                                               return i.frees == i.push_backs;
+                                             }),
+                              _VisitedContainers->end());
   }
 
 public:
@@ -34,19 +36,22 @@ public:
     auto deletedNode = result.Nodes.getNodeAs<DeclRefExpr>("deleted");
 
     if (allocNode && constrList) {
-      for (std::vector<VisitedContainer>::iterator it = _VisitedContainers->begin(),
-                                                end = _VisitedContainers->end();
+      for (std::vector<VisitedContainer>::iterator
+               it = _VisitedContainers->begin(),
+               end = _VisitedContainers->end();
            it != end; ++it) {
         if (it.base()->objName == allocNode->getNameAsString()) {
-          llvm::outs() << it.base()->objName << "push_backs: " << it.base()->push_backs << "\n";
+          llvm::outs() << it.base()->objName
+                       << "push_backs: " << it.base()->push_backs << "\n";
           it.base()->push_backs += constrList->getNumInits();
         }
       }
     }
 
     if (deletedNode) {
-      for (std::vector<VisitedContainer>::iterator it = _VisitedContainers->begin(),
-                                                end = _VisitedContainers->end();
+      for (std::vector<VisitedContainer>::iterator
+               it = _VisitedContainers->begin(),
+               end = _VisitedContainers->end();
            it != end; ++it) {
         if (it.base()->objName == deletedNode->getNameInfo().getAsString()) {
           it.base()->frees += 1;
@@ -61,11 +66,15 @@ public:
 
   virtual void writeOutput() override {
     removeFromVector();
-    for (std::vector<VisitedContainer>::iterator it = _VisitedContainers->begin(),
-                                              end = _VisitedContainers->end();
+    for (std::vector<VisitedContainer>::iterator
+             it = _VisitedContainers->begin(),
+             end = _VisitedContainers->end();
          it != end; ++it) {
-      llvm::outs() << it.base()->objName << " container isn't deleted properly at "
-                   << it.base()->allocedLine << ". deletions: " << it.base()->frees << ", inserts: " << it.base()->push_backs << ". \n";
+      llvm::outs() << it.base()->objName
+                   << " container isn't deleted properly at "
+                   << it.base()->allocedLine
+                   << ". deletions: " << it.base()->frees
+                   << ", inserts: " << it.base()->push_backs << ". \n";
     }
   }
 
