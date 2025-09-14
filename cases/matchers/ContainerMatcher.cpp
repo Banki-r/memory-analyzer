@@ -41,8 +41,6 @@ public:
                end = _VisitedContainers->end();
            it != end; ++it) {
         if (it.base()->objName == allocNode->getNameAsString()) {
-          llvm::outs() << it.base()->objName
-                       << "push_backs: " << it.base()->push_backs << "\n";
           it.base()->push_backs += constrList->getNumInits();
         }
       }

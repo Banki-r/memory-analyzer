@@ -39,7 +39,6 @@ public:
         isItAContainer(typeAsString)) {
       VisitedContainer vv;
       vv.objName = decl->getNameAsString();
-      llvm::outs() << vv.objName << " is an OBJNAME \n";
       vv.allocedLine = locStr(decl->getBeginLoc());
       _VisitedContainers->push_back(vv);
     }
