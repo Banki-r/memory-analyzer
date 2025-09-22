@@ -12,6 +12,7 @@
 #include <cases/matchers/NewMatcher.cpp>
 #include <cases/matchers/ReAllocMatcher.cpp>
 #include <cases/matchers/UninitializedMatcher.cpp>
+#include <cases/matchers/LinkedlistImplMatcher.cpp>
 #include <cases/visitors/ContainerVisitor.cpp>
 #include <cases/visitors/IASTVisitor.h>
 

@@ -37,4 +37,5 @@ void ASTConsumerWrapper::constructMatchers() {
   auto containerMatcher = std::make_unique<ContainerMatcher>();
   containerMatcher.get()->setVisitedContainers(&_VisitedContainers);
   _matchers.push_back(std::move(containerMatcher));
+  _matchers.push_back(std::make_unique<LinkedlistImplMatcher>());
 }

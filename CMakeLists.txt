@@ -15,12 +15,14 @@ add_clang_executable(memory-analyzer
     datatypes/UninitializedPointer.h
     datatypes/VisitedContainer.h
     datatypes/MemberLoc.h
+    datatypes/ImplementedLinkedlist.h
     cases/matchers/MallocMatcher.cpp
     cases/matchers/NewMatcher.cpp
     cases/matchers/ReAllocMatcher.cpp
     cases/matchers/FunctionAllocMatcher.cpp
     cases/matchers/UninitializedMatcher.cpp
     cases/matchers/ContainerMatcher.cpp
+    cases/matchers/LinkedlistImplMatcher.cpp
     cases/matchers/IMatcher.h
     cases/visitors/IASTVisitor.h
     cases/visitors/ContainerVisitor.cpp
