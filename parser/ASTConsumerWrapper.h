@@ -8,11 +8,11 @@
 #include <cases/matchers/ContainerMatcher.cpp>
 #include <cases/matchers/FunctionAllocMatcher.cpp>
 #include <cases/matchers/IMatcher.h>
+#include <cases/matchers/LinkedlistImplMatcher.cpp>
 #include <cases/matchers/MallocMatcher.cpp>
 #include <cases/matchers/NewMatcher.cpp>
 #include <cases/matchers/ReAllocMatcher.cpp>
 #include <cases/matchers/UninitializedMatcher.cpp>
-#include <cases/matchers/LinkedlistImplMatcher.cpp>
 #include <cases/visitors/ContainerVisitor.cpp>
 #include <cases/visitors/IASTVisitor.h>
 
