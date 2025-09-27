@@ -23,6 +23,7 @@ add_clang_executable(memory-analyzer
     cases/matchers/UninitializedMatcher.cpp
     cases/matchers/ContainerMatcher.cpp
     cases/matchers/LinkedlistImplMatcher.cpp
+    cases/matchers/VectorImplMatcher.cpp
     cases/matchers/IMatcher.h
     cases/visitors/IASTVisitor.h
     cases/visitors/ContainerVisitor.cpp

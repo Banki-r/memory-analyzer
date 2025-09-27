@@ -20,7 +20,7 @@ private:
               hasCondition(binaryOperator().bind("forOp")),
               hasAncestor(compoundStmt(hasAncestor(cxxDestructorDecl()))))
           .bind("forStmt");
-  std::vector<ImplementedLinkedlist> _ImplementedLinkedlists;
+  std::vector<ImplementedContainer> _ImplementedLinkedlists;
   std::vector<StatementMatcher> _matchers = {_cMatcher, _dwhileMatcher,
                                              _dforMatcher};
 
@@ -28,7 +28,7 @@ private:
     _ImplementedLinkedlists.erase(
         std::remove_if(
             _ImplementedLinkedlists.begin(), _ImplementedLinkedlists.end(),
-            [](ImplementedLinkedlist i) { return i.deletedProperly; }),
+            [](ImplementedContainer i) { return i.deletedProperly; }),
         _ImplementedLinkedlists.end());
   }
 
@@ -45,21 +45,24 @@ public:
     auto forVar = result.Nodes.getNodeAs<MemberExpr>("forVar");
 
     if (initCxx) {
-      for (clang::CXXCtorInitializer *init : initCxx->inits()) {
-        if (init->isMemberInitializer()) {
-          clang::Expr *initExpr = init->getInit();
-          if (initExpr) {
-            if (clang::IntegerLiteral *intLit =
-                    clang::dyn_cast<clang::IntegerLiteral>(initExpr)) {
-              ImplementedLinkedlist ill;
-              ill.sizeVarName = init->getMember()->getNameAsString();
-              ill.loc = init->getMember()->getLocation().printToString(
-                  *result.SourceManager);
-              ill.deletedProperly = false;
-              _ImplementedLinkedlists.push_back(ill);
+      if(result.SourceManager->isInMainFile(initCxx->getLocation()))
+      {
+        for (clang::CXXCtorInitializer *init : initCxx->inits()) {
+          if (init->isMemberInitializer()) {
+            clang::Expr *initExpr = init->getInit();
+            if (initExpr) {
+              if (clang::IntegerLiteral *intLit =
+                      clang::dyn_cast<clang::IntegerLiteral>(initExpr)) {
+                ImplementedContainer ill;
+                ill.sizeVarName = init->getMember()->getNameAsString();
+                ill.loc = init->getMember()->getLocation().printToString(
+                    *result.SourceManager);
+                ill.deletedProperly = false;
+                _ImplementedLinkedlists.push_back(ill);
+              }
             }
           }
-        }
+        }   
       }
     }
 
@@ -97,7 +100,7 @@ public:
 
   virtual void writeOutput() override {
     removeFromVector();
-    for (std::vector<ImplementedLinkedlist>::iterator
+    for (std::vector<ImplementedContainer>::iterator
              it = _ImplementedLinkedlists.begin(),
              end = _ImplementedLinkedlists.end();
          it != end; ++it) {

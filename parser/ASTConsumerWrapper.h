@@ -9,6 +9,7 @@
 #include <cases/matchers/FunctionAllocMatcher.cpp>
 #include <cases/matchers/IMatcher.h>
 #include <cases/matchers/LinkedlistImplMatcher.cpp>
+#include <cases/matchers/VectorImplMatcher.cpp>
 #include <cases/matchers/MallocMatcher.cpp>
 #include <cases/matchers/NewMatcher.cpp>
 #include <cases/matchers/ReAllocMatcher.cpp>

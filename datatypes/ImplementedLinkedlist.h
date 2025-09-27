@@ -1,7 +1,7 @@
 #pragma once
 #include <iostream>
 
-struct ImplementedLinkedlist {
+struct ImplementedContainer {
   std::string sizeVarName;
   std::string loc;
   bool deletedProperly;
