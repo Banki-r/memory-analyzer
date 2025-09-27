@@ -45,8 +45,7 @@ public:
     auto forVar = result.Nodes.getNodeAs<MemberExpr>("forVar");
 
     if (initCxx) {
-      if(result.SourceManager->isInMainFile(initCxx->getLocation()))
-      {
+      if (result.SourceManager->isInMainFile(initCxx->getLocation())) {
         for (clang::CXXCtorInitializer *init : initCxx->inits()) {
           if (init->isMemberInitializer()) {
             clang::Expr *initExpr = init->getInit();
@@ -62,7 +61,7 @@ public:
               }
             }
           }
-        }   
+        }
       }
     }
 

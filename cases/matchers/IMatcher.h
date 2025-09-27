@@ -3,8 +3,8 @@
 #include "clang/ASTMatchers/ASTMatchFinder.h"
 #include "clang/ASTMatchers/ASTMatchers.h"
 #include "clang/Basic/SourceManager.h"
-#include <string>
 #include <algorithm>
+#include <string>
 
 using namespace clang;
 using namespace clang::ast_matchers;
@@ -25,18 +25,18 @@ protected:
     }
     return nullptr;
   }
-    static bool caseInsensitiveCharCompare(char a, char b)
-    {
-        return tolower(a) == tolower(b);
-    }
+  static bool caseInsensitiveCharCompare(char a, char b) {
+    return tolower(a) == tolower(b);
+  }
 
-    bool caseInsensitiveSubstrSearch(const std::string& str, const std::string& substr)
-    {
-        auto it = std::search(str.begin(), str.end(), substr.begin(), substr.end(), &caseInsensitiveCharCompare);
+  bool caseInsensitiveSubstrSearch(const std::string &str,
+                                   const std::string &substr) {
+    auto it = std::search(str.begin(), str.end(), substr.begin(), substr.end(),
+                          &caseInsensitiveCharCompare);
 
-        llvm::outs () << (it != str.end()) << " is search\n";
-        return it != str.end();
-    }
+    llvm::outs() << (it != str.end()) << " is search\n";
+    return it != str.end();
+  }
 
 public:
   virtual void run(const MatchFinder::MatchResult &result) override = 0;
