@@ -11,6 +11,8 @@ using namespace clang::ast_matchers;
 
 class IMatcher : public MatchFinder::MatchCallback {
 protected:
+  const std::string UNKOWN = "UNKOWN";
+
   template <typename T>
   const FunctionDecl *getParentFunction(const MatchFinder::MatchResult &result,
                                         T &Node) {
@@ -33,8 +35,6 @@ protected:
                                    const std::string &substr) {
     auto it = std::search(str.begin(), str.end(), substr.begin(), substr.end(),
                           &caseInsensitiveCharCompare);
-
-    llvm::outs() << (it != str.end()) << " is search\n";
     return it != str.end();
   }
 

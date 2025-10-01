@@ -8,7 +8,6 @@ using namespace clang::ast_matchers;
 
 class VectorImplMatcher : public IMatcher {
 private:
-  const std::string UNKOWN = "UNKOWN";
   StatementMatcher _dMatcher =
       memberExpr(hasAncestor(compoundStmt(
                                  hasAncestor(cxxDestructorDecl().bind("destr")))

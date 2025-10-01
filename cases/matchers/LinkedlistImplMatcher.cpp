@@ -20,9 +20,12 @@ private:
               hasCondition(binaryOperator().bind("forOp")),
               hasAncestor(compoundStmt(hasAncestor(cxxDestructorDecl()))))
           .bind("forStmt");
+  StatementMatcher _eMatcher =
+      compoundStmt(hasAncestor(cxxDestructorDecl().bind("destr")))
+          .bind("compn");
   std::vector<ImplementedContainer> _ImplementedLinkedlists;
   std::vector<StatementMatcher> _matchers = {_cMatcher, _dwhileMatcher,
-                                             _dforMatcher};
+                                             _dforMatcher, _eMatcher};
 
   void removeFromVector() {
     _ImplementedLinkedlists.erase(
@@ -43,6 +46,9 @@ public:
     auto deleteFor = result.Nodes.getNodeAs<ForStmt>("forStmt");
     auto opFor = result.Nodes.getNodeAs<BinaryOperator>("forOp");
     auto forVar = result.Nodes.getNodeAs<MemberExpr>("forVar");
+
+    auto destr = result.Nodes.getNodeAs<CXXDestructorDecl>("destr");
+    auto compn = result.Nodes.getNodeAs<CompoundStmt>("compn");
 
     if (initCxx) {
       if (result.SourceManager->isInMainFile(initCxx->getLocation())) {
@@ -91,6 +97,18 @@ public:
         }
       }
     }
+
+    if (destr && compn) {
+      if (compn->body_empty() &&
+          caseInsensitiveSubstrSearch(destr->getDeclName().getAsString(),
+                                      "linkedlist")) {
+        ImplementedContainer il;
+        il.sizeVarName = UNKOWN;
+        il.deletedProperly = false;
+        il.loc = compn->getBeginLoc().printToString(*result.SourceManager);
+        _ImplementedLinkedlists.push_back(il);
+      }
+    }
   }
 
   virtual std::vector<StatementMatcher> getMatchers() override {
@@ -103,10 +121,15 @@ public:
              it = _ImplementedLinkedlists.begin(),
              end = _ImplementedLinkedlists.end();
          it != end; ++it) {
-      llvm::outs()
-          << "Linked List destructor propably doesn't delete everything."
-          << " Try using variable " << it.base()->loc
-          << " in the destructor.\n";
+      if (it.base()->sizeVarName == UNKOWN) {
+        llvm::outs() << "Linked List destructor at " << it.base()->loc
+                     << " propably doesn't delete everything.\n";
+      } else {
+        llvm::outs()
+            << "Linked List destructor propably doesn't delete everything."
+            << " Try using variable " << it.base()->loc
+            << " in the destructor.\n";
+      }
     }
   }
 };
