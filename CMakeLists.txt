@@ -1,5 +1,13 @@
+cmake_minimum_required(VERSION 3.6 FATAL_ERROR)
+
 set(LLVM_LINK_COMPONENTS support)
 set(CMAKE_CXX_COMPILER /usr/bin/clang++)
+
+find_package(PkgConfig REQUIRED)
+pkg_check_modules(GTKMM REQUIRED gtkmm-4.0)
+
+include_directories(${GTKMM_INCLUDE_DIRS})
+link_directories(${GTKMM_LIBRARY_DIRS})
 
 add_clang_executable(memory-analyzer
     control/FrontendActionWrapper.cpp
@@ -27,6 +35,8 @@ add_clang_executable(memory-analyzer
     cases/matchers/IMatcher.h
     cases/visitors/IASTVisitor.h
     cases/visitors/ContainerVisitor.cpp
+    view/MainWindow.h
+    view/MainWindow.cpp
 )
 
 target_link_libraries(memory-analyzer
@@ -34,4 +44,5 @@ target_link_libraries(memory-analyzer
     clangAST
     clangFrontend
     clangTooling
+    ${GTKMM_LIBRARIES}
 )
