@@ -2,9 +2,8 @@
 #include <iostream>
 #include <cstring>
 
-MainWindow::MainWindow(void (*func)(int, const char**), int argc)
+MainWindow::MainWindow(void (*func)(std::string *))
 {
-    _argc = argc + 1;
     _func = func;
     set_default_size(500, 500);
     set_child(m_fixed);
@@ -60,8 +59,8 @@ void MainWindow::on_file_dialog_finish(
 
         auto filename = file->get_path();
         std::cout << "File selected: " << filename << std::endl;
-        filename_ = filename.c_str();
-        _func(_argc, &filename_);
+        filename_ = filename;
+        _func(&filename_);
     }catch(const Gtk::DialogError& err)
     {
         std::cout << "No file selected" << std::endl;

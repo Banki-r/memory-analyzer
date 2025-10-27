@@ -4,14 +4,14 @@
 class MainWindow : public Gtk::Window
 {
 public:
-    MainWindow(void (*func)(int, const char**), int argc);
+    MainWindow(void (*func)(std::string *));
     ~MainWindow();
-    const char* filename_;
+    std::string filename_;
 protected:
     void on_button_clicked();
     void on_file_dialog_finish(const Glib::RefPtr<Gio::AsyncResult>& result,
     const Glib::RefPtr<Gtk::FileDialog>& dialog);
-    void (*_func)(int, const char**);
+    void (*_func)(std::string *);
     int _argc;
     Gtk::ScrolledWindow m_scrollw;
     Gtk::Fixed m_fixed;
