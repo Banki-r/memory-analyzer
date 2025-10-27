@@ -103,19 +103,21 @@ public:
     return _matchers;
   }
 
-  virtual void writeOutput() override {
+  virtual std::string writeOutput() override {
     removeFromVector();
+    std::ostringstream retval;
     for (CastedPointer element : _castedPointers) {
       if (element.freeLine.empty()) {
-        llvm::outs() << "Variable " << element.name
+        retval << "Variable " << element.name
                      << " declared with new call at: " << element.allocLine
                      << ", is not deleted!\n";
       }
       if (!element.recastLine.empty()) {
-        llvm::outs() << "Variable " << element.name
+        retval << "Variable " << element.name
                      << " declared with new call at: " << element.allocLine
                      << ", is recasted at: " << element.recastLine << "!\n";
       }
     }
+    return retval.str();
   }
 };

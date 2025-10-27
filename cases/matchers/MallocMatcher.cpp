@@ -90,12 +90,14 @@ public:
     return _matchers;
   }
 
-  virtual void writeOutput() override {
+  virtual std::string writeOutput() override {
     removeFromVector();
+    std::ostringstream retval;
     for (AllocedPointer element : _allocedPointers) {
-      llvm::outs() << "Variable " << element.name
+      retval << "Variable " << element.name
                    << " declared with a malloc call at: " << element.allocLine
                    << ", is not freed up!\n";
     }
+    return retval.str();
   }
 };

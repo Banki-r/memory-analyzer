@@ -8,6 +8,8 @@ pkg_check_modules(GTKMM REQUIRED gtkmm-4.0)
 
 include_directories(${GTKMM_INCLUDE_DIRS})
 link_directories(${GTKMM_LIBRARY_DIRS})
+include_directories(${LLVM_INCLUDE_DIRS})
+include_directories(${CLANG_INLCUDE_DIRS})
 
 add_clang_executable(memory-analyzer
     control/FrontendActionWrapper.cpp
@@ -40,9 +42,11 @@ add_clang_executable(memory-analyzer
 )
 
 target_link_libraries(memory-analyzer
-    PRIVATE
+    PUBLIC
+    ${GTKMM_LIBRARIES}
     clangAST
     clangFrontend
     clangTooling
-    ${GTKMM_LIBRARIES}
 )
+
+add_definitions(-frtti)

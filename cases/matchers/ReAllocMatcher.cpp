@@ -66,13 +66,15 @@ public:
     return _matchers;
   }
 
-  virtual void writeOutput() override {
+  virtual std::string writeOutput() override {
     removeFromVector();
+    std::ostringstream retval;
     for (ReAllocedPointer element : _reAllocedPointers) {
-      llvm::outs() << "Pointer " << element.name
+      retval << "Pointer " << element.name
                    << " declared at: " << element.allocLine
                    << ", is hidden by a reallocation at: "
                    << element.reAllocedLine << " !\n";
     }
+    return retval.str();
   }
 };

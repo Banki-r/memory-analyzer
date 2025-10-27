@@ -115,21 +115,23 @@ public:
     return _matchers;
   }
 
-  virtual void writeOutput() override {
+  virtual std::string writeOutput() override {
     removeFromVector();
+    std::ostringstream retval;
     for (std::vector<ImplementedContainer>::iterator
              it = _ImplementedLinkedlists.begin(),
              end = _ImplementedLinkedlists.end();
          it != end; ++it) {
       if (it.base()->sizeVarName == UNKOWN) {
-        llvm::outs() << "Linked List destructor at " << it.base()->loc
+        retval << "Linked List destructor at " << it.base()->loc
                      << " propably doesn't delete everything.\n";
       } else {
-        llvm::outs()
+        retval
             << "Linked List destructor propably doesn't delete everything."
             << " Try using variable " << it.base()->loc
             << " in the destructor.\n";
       }
     }
+    return retval.str();
   }
 };

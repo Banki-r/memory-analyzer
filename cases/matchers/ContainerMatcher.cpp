@@ -62,18 +62,20 @@ public:
     return _matchers;
   }
 
-  virtual void writeOutput() override {
+  virtual std::string writeOutput() override {
     removeFromVector();
+    std::ostringstream retval;
     for (std::vector<VisitedContainer>::iterator
              it = _VisitedContainers->begin(),
              end = _VisitedContainers->end();
          it != end; ++it) {
-      llvm::outs() << it.base()->objName
+      retval << it.base()->objName
                    << " container isn't deleted properly at "
                    << it.base()->allocedLine
                    << ". deletions: " << it.base()->frees
                    << ", inserts: " << it.base()->push_backs << ". \n";
     }
+    return retval.str();
   }
 
   void setVisitedContainers(std::vector<VisitedContainer> *VisitedContainers) {

@@ -71,21 +71,23 @@ public:
     return _matchers;
   }
 
-  virtual void writeOutput() override {
+  virtual std::string writeOutput() override {
     removeFromVector();
+    std::ostringstream retval;
     for (std::vector<ImplementedContainer>::iterator
              it = _ImplementedVectors.begin(),
              end = _ImplementedVectors.end();
          it != end; ++it) {
 
       if (it.base()->sizeVarName == UNKOWN) {
-        llvm::outs() << "Vector destructor at " << it.base()->loc
+        retval <<"Vector destructor at " << it.base()->loc
                      << " propably doesn't delete everything.\n";
       } else {
-        llvm::outs() << "Vector destructor propably doesn't delete everything."
+        retval <<"Vector destructor propably doesn't delete everything."
                      << " Try using variable " << it.base()->loc
                      << " in the destructor.\n";
       }
     }
+    return retval.str();
   }
 };

@@ -1,5 +1,8 @@
 
 #pragma once
+#include <iostream>
+#include <ostream>
+#include <string>
 
 #include <clang/AST/ASTConsumer.h>
 #include <clang/ASTMatchers/ASTMatchFinder.h>
@@ -34,4 +37,5 @@ public:
   ASTConsumerWrapper(clang::ASTContext *context,
                      clang::SourceManager &sourceManager);
   void HandleTranslationUnit(clang::ASTContext &context) override;
+  std::string GetOutput();
 };

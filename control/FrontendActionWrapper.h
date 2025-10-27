@@ -1,6 +1,7 @@
 #pragma once
 
 #include <clang/Frontend/FrontendAction.h>
+#include "parser/ASTConsumerWrapper.h"
 
 class FrontendActionWrapper : public clang::ASTFrontendAction {
 protected:

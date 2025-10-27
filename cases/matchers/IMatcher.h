@@ -4,6 +4,8 @@
 #include "clang/ASTMatchers/ASTMatchers.h"
 #include "clang/Basic/SourceManager.h"
 #include <algorithm>
+#include <sstream>
+#include <iostream>
 #include <string>
 
 using namespace clang;
@@ -41,5 +43,5 @@ protected:
 public:
   virtual void run(const MatchFinder::MatchResult &result) override = 0;
   virtual std::vector<StatementMatcher> getMatchers() = 0;
-  virtual void writeOutput() = 0;
+  virtual std::string writeOutput() = 0;
 };

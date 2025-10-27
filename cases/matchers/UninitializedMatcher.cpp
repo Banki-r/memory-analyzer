@@ -36,11 +36,13 @@ public:
     return _matchers;
   }
 
-  virtual void writeOutput() override {
+  virtual std::string writeOutput() override {
+    std::ostringstream retval;
     for (UninitializedPointer element : _uninitializedPointers) {
-      llvm::outs() << "Pointer " << element.name
+      retval << "Pointer " << element.name
                    << " is not initialized at declaration: "
                    << element.allocLine << " !\n";
     }
+    return retval.str();
   }
 };

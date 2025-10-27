@@ -1,6 +1,5 @@
 
 #include "FrontendFactoryWrapper.h"
-#include "FrontendActionWrapper.h"
 
 FrontendFactoryWrapper::FrontendFactoryWrapper() {}
 
