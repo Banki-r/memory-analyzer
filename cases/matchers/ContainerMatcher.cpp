@@ -69,11 +69,9 @@ public:
              it = _VisitedContainers->begin(),
              end = _VisitedContainers->end();
          it != end; ++it) {
-      retval << it.base()->objName
-                   << " container isn't deleted properly at "
-                   << it.base()->allocedLine
-                   << ". deletions: " << it.base()->frees
-                   << ", inserts: " << it.base()->push_backs << ". \n";
+      retval << it.base()->objName << " container isn't deleted properly at "
+             << it.base()->allocedLine << ". deletions: " << it.base()->frees
+             << ", inserts: " << it.base()->push_backs << ". \n";
     }
     return retval.str();
   }

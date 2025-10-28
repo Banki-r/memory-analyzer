@@ -40,8 +40,8 @@ public:
     std::ostringstream retval;
     for (UninitializedPointer element : _uninitializedPointers) {
       retval << "Pointer " << element.name
-                   << " is not initialized at declaration: "
-                   << element.allocLine << " !\n";
+             << " is not initialized at declaration: " << element.allocLine
+             << " !\n";
     }
     return retval.str();
   }

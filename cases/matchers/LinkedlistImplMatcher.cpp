@@ -124,12 +124,11 @@ public:
          it != end; ++it) {
       if (it.base()->sizeVarName == UNKOWN) {
         retval << "Linked List destructor at " << it.base()->loc
-                     << " propably doesn't delete everything.\n";
+               << " propably doesn't delete everything.\n";
       } else {
-        retval
-            << "Linked List destructor propably doesn't delete everything."
-            << " Try using variable " << it.base()->loc
-            << " in the destructor.\n";
+        retval << "Linked List destructor propably doesn't delete everything."
+               << " Try using variable " << it.base()->loc
+               << " in the destructor.\n";
       }
     }
     return retval.str();

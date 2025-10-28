@@ -95,8 +95,8 @@ public:
     std::ostringstream retval;
     for (AllocedPointer element : _allocedPointers) {
       retval << "Variable " << element.name
-                   << " declared with a malloc call at: " << element.allocLine
-                   << ", is not freed up!\n";
+             << " declared with a malloc call at: " << element.allocLine
+             << ", is not freed up!\n";
     }
     return retval.str();
   }

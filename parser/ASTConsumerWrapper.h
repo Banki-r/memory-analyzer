@@ -31,11 +31,13 @@ private:
   std::vector<VisitedContainer> _VisitedContainers;
   std::vector<MemberLoc> _memberLocs;
 
+  std::string *_output;
+
   void constructMatchers();
 
 public:
   ASTConsumerWrapper(clang::ASTContext *context,
-                     clang::SourceManager &sourceManager);
+                     clang::SourceManager &sourceManager, std::string *output);
   void HandleTranslationUnit(clang::ASTContext &context) override;
-  std::string GetOutput();
+  void GetOutput();
 };

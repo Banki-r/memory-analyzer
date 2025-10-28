@@ -80,12 +80,12 @@ public:
          it != end; ++it) {
 
       if (it.base()->sizeVarName == UNKOWN) {
-        retval <<"Vector destructor at " << it.base()->loc
-                     << " propably doesn't delete everything.\n";
+        retval << "Vector destructor at " << it.base()->loc
+               << " propably doesn't delete everything.\n";
       } else {
-        retval <<"Vector destructor propably doesn't delete everything."
-                     << " Try using variable " << it.base()->loc
-                     << " in the destructor.\n";
+        retval << "Vector destructor propably doesn't delete everything."
+               << " Try using variable " << it.base()->loc
+               << " in the destructor.\n";
       }
     }
     return retval.str();

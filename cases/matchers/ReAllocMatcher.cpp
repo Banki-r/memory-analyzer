@@ -71,9 +71,9 @@ public:
     std::ostringstream retval;
     for (ReAllocedPointer element : _reAllocedPointers) {
       retval << "Pointer " << element.name
-                   << " declared at: " << element.allocLine
-                   << ", is hidden by a reallocation at: "
-                   << element.reAllocedLine << " !\n";
+             << " declared at: " << element.allocLine
+             << ", is hidden by a reallocation at: " << element.reAllocedLine
+             << " !\n";
     }
     return retval.str();
   }

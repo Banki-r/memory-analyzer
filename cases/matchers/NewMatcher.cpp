@@ -109,13 +109,13 @@ public:
     for (CastedPointer element : _castedPointers) {
       if (element.freeLine.empty()) {
         retval << "Variable " << element.name
-                     << " declared with new call at: " << element.allocLine
-                     << ", is not deleted!\n";
+               << " declared with new call at: " << element.allocLine
+               << ", is not deleted!\n";
       }
       if (!element.recastLine.empty()) {
         retval << "Variable " << element.name
-                     << " declared with new call at: " << element.allocLine
-                     << ", is recasted at: " << element.recastLine << "!\n";
+               << " declared with new call at: " << element.allocLine
+               << ", is recasted at: " << element.recastLine << "!\n";
       }
     }
     return retval.str();

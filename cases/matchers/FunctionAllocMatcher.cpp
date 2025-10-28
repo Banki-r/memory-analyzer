@@ -89,8 +89,8 @@ public:
     std::ostringstream retval;
     for (AllocedPointer element : _allocedPointers) {
       retval << "Variable " << element.name
-                   << " declared with a function call at: " << element.allocLine
-                   << ", is not deleted!\n";
+             << " declared with a function call at: " << element.allocLine
+             << ", is not deleted!\n";
     }
     return retval.str();
   }

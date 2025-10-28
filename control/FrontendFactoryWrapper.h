@@ -1,10 +1,13 @@
 #pragma once
 
-#include <clang/Tooling/Tooling.h>
 #include "control/FrontendActionWrapper.h"
+#include <clang/Tooling/Tooling.h>
 
 class FrontendFactoryWrapper : public clang::tooling::FrontendActionFactory {
+private:
+  std::string *_output;
+
 public:
-  FrontendFactoryWrapper();
+  FrontendFactoryWrapper(std::string *output);
   std::unique_ptr<clang::FrontendAction> create() override;
 };

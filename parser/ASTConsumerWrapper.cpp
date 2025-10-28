@@ -1,9 +1,10 @@
 #include "ASTConsumerWrapper.h"
 
 ASTConsumerWrapper::ASTConsumerWrapper(clang::ASTContext *context,
-                                       clang::SourceManager &sourceManager)
+                                       clang::SourceManager &sourceManager,
+                                       std::string *output)
     : _context(context), _sourceManager(sourceManager),
-      vVisitor(context, &_VisitedContainers, &_memberLocs) {
+      vVisitor(context, &_VisitedContainers, &_memberLocs), _output(output) {
   constructMatchers();
   for (size_t i = 0; i < _matchers.size(); ++i) {
     std::vector<clang::ast_matchers::StatementMatcher> matchers =
@@ -19,6 +20,8 @@ void ASTConsumerWrapper::HandleTranslationUnit(clang::ASTContext &ctx) {
   vVisitor.TraverseDecl(tuDecl);
 
   _matchFinder.matchAST(*_context);
+
+  GetOutput();
 }
 
 // edit this function if a new Matcher is created,
@@ -36,13 +39,11 @@ void ASTConsumerWrapper::constructMatchers() {
   _matchers.push_back(std::make_unique<VectorImplMatcher>());
 }
 
-std::string ASTConsumerWrapper::GetOutput()
-{
+void ASTConsumerWrapper::GetOutput() {
   std::ostringstream os;
-  for (size_t i = 0; i < _matchers.size(); i++)
-  {
+  for (size_t i = 0; i < _matchers.size(); i++) {
     os << _matchers.at(i).get()->writeOutput();
   }
 
-  return os.str();
+  *_output = os.str();
 }
