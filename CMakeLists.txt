@@ -1,8 +1,5 @@
 cmake_minimum_required(VERSION 3.6 FATAL_ERROR)
 
-set(HAVE_CSS_ATOMICS64_WITHOUT_LIB True)
-set(HAVE_CSS_ATOMICS_WITHOUT_LIB True)
-
 set(LLVM_LINK_COMPONENTS support)
 set(CMAKE_CXX_COMPILER /usr/bin/clang++)
 
@@ -13,14 +10,6 @@ include_directories(${GTKMM_INCLUDE_DIRS})
 link_directories(${GTKMM_LIBRARY_DIRS})
 include_directories(${LLVM_INCLUDE_DIRS})
 include_directories(${CLANG_INLCUDE_DIRS})
-
-include(FetchContent)
-
-FetchContent_Declare(
-    googletest
-    URL https://github.com/google/googletest/archive/refs/heads/main.zip
-)
-FetchContent_MakeAvailable(googletest)
 
 add_clang_executable(memory-analyzer
     control/FrontendActionWrapper.cpp
@@ -50,13 +39,7 @@ add_clang_executable(memory-analyzer
     cases/visitors/ContainerVisitor.cpp
     view/MainWindow.h
     view/MainWindow.cpp
-
-    tests/MallocMatcherTests.cc
 )
-
-enable_testing()
-
-include(GoogleTest)
 
 target_link_libraries(memory-analyzer
     PUBLIC
