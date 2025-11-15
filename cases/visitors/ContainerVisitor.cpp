@@ -25,7 +25,9 @@ public:
     bool isList = (str.find("std::list") != std::string::npos ||
                    str.find("list") != std::string::npos);
 
-    return isVector || isDeque || isList;
+    bool isPointerHolder = str.find("*") != std::string::npos;
+
+    return isPointerHolder && (isVector || isDeque || isList);
   }
 
   // visits the alloc line
