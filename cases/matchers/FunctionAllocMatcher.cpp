@@ -43,15 +43,20 @@ public:
     if (allocNode && varNode && functionNode && !varNode->isImplicit() &&
         functionNode->getNameInfo().getAsString().find("malloc") ==
             std::string::npos) {
-      if (result.Context->getSourceManager().isWrittenInMainFile(
+      const clang::Type * retType = functionNode->getReturnType().getTypePtr();
+      llvm::outs() << functionNode->getNameInfo().getAsString() << ": " << retType->isPointerType() << "\n";
+      if(retType && retType->isPointerType())
+      {
+        if (result.Context->getSourceManager().isWrittenInMainFile(
               allocNode->getBeginLoc())) {
-        AllocedPointer ap;
-        ap.allocFunc = getParentFunction(result, *allocNode)->getNameAsString();
-        ap.allocLine = allocNode->getBeginLoc().printToString(
-            result.Context->getSourceManager());
-        ap.name = varNode->getNameAsString();
-        ap.freeLine = "";
-        _allocedPointers.push_back(ap);
+          AllocedPointer ap;
+          ap.allocFunc = getParentFunction(result, *allocNode)->getNameAsString();
+          ap.allocLine = allocNode->getBeginLoc().printToString(
+              result.Context->getSourceManager());
+          ap.name = varNode->getNameAsString();
+          ap.freeLine = "";
+          _allocedPointers.push_back(ap);
+        }
       }
     }
 
