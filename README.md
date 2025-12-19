@@ -6,7 +6,7 @@ If you still want to use this tool then below are the ways to do so.
 
 ## Prerequisites
 
-- The tool was made and tested in Ubuntu 24.04.02, but it should work on any Linux machine
+- The tool was made and tested in Ubuntu 24.04.02, but it should work on any Linux machine  
 Installed libraries and tools:
 - clang
 - gtkmm 4
