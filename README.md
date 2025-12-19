@@ -1,7 +1,7 @@
 # memory-analyzer
 ## Introduction
 
-This project was primarily used as a thesis subject so it's real world uses are questinable at best.
+This project was primarily used as a thesis subject so it's real world uses are questionable at best.
 If you still want to use this tool then below are the ways to do so.
 
 ## Prerequisites
